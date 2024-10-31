@@ -62,7 +62,7 @@ def qr(mat):
 class Design:
     def __init__(self, L):
         """
-        Lower Cholesky factor of the pedigree genetic relatedness matrix.
+        Lower Cholesky factor of the inverse of the pedigree adjacency matrix.
         Supports forward and backward substitution of the Cholesky factor.
 
         Parameters
