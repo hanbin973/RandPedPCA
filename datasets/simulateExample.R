@@ -112,6 +112,7 @@ for (generation in 1:10) {
 # but add also continually admixed population selected on an index
 popAB <- randCross(pop = c(parentsA, parentsB), nCrosses = 50)
 popAB <- setPheno(pop = popAB, varE = diag(varE))
+data <- collectData(pop = popAB, data = data, population = "AB", generation = generation)
 economicWeights <- c(1, 1)
 selIndexWeights <- smithHazel(econWt = economicWeights, varG = varG, varP = varG + varE)
 for (generation in 11:20) {
