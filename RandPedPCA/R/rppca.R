@@ -1,12 +1,21 @@
 
 
 
-#' Generate range matrix
+
+#' Generat range matrix for SVD
 #'
-#' The efficiency of RandPedPCA relies on the fact that a relatively small
-#' matrix is decomposed instead of the original large L inverse. This function
-#' generates the range matrix.
+#' @param L a pedigree's L inverse matrix in sparse 'spam' format
+#' @param rank  `integer` how many principal components to return
+#' @param depth `integer` number of iterations for generating the range matrix
+#' @param numVectors `integer` > `rank` to specify the oversampling for the
 #'
+#' @return
+#' @export
+#'
+#' @importFrom spam backsolve
+#' @importFrom spam forwardsolve
+#' @importFrom stats rnorm
+#' @examples
 randRangeFinder <- function(L, rank, depth, numVectors){
   dim <- nrow(L)
   testVectors <- rnorm(n = dim * numVectors)
@@ -36,6 +45,7 @@ randRangeFinder <- function(L, rank, depth, numVectors){
 #' @return A list of three: u (=U), d (=Sigma), and v (=W^T)
 #' @export
 #'
+#' @importFrom spam backsolve
 #' @examples
 randSVD <- function(L, rank, depth, numVectors){
   # L: lower cholesky factor of animal matrix
@@ -44,7 +54,7 @@ randSVD <- function(L, rank, depth, numVectors){
   # numVectors: usually rank + 5~10, must be larger than rank
   dim <- nrow(L)
   Q <- randRangeFinder(L, rank, depth, numVectors)
-  C <- t(spam::backsolve(t(L), Q))
+  C <- t(backsolve(t(L), Q))
   svdObject <- svd(C)
   U <- Q %*% svdObject$u
   D <- svdObject$d ** 2
@@ -73,8 +83,9 @@ rppca <- function(L, method="randSVD", rank=10, depth=3, numVectors=15){
 
     if(method=="randSVD"){
     rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
-
-    return(list(scores= rsvd$u %*% diag(rsvd$d)
+    scores = rsvd$u %*% diag(rsvd$d)
+    dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
+    return(list(scores= scores
                 # Would be good to also return variance proportions.
                 # PCA usually returns loadings but not sure this makes sense
                 # here where we only have the loading of the range matrix?

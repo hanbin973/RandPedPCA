@@ -11,12 +11,14 @@ Description: RandPedPCA is for computing PCAs of large pedigrees such as found
     in breeding populations. RandPedPCA exploits sparse matrices and random
     linear algebra to deliver a gazillion-times speedup compared to naive SVD or
     eigen decomposition.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends:
     spam,
-    Matrix
+    Matrix,
+    methods,
+    R (>= 2.10)
 Suggests:
     pedigreeTools
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.2

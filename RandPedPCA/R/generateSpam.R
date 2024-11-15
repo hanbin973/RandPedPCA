@@ -10,12 +10,15 @@
 #'
 #' @return A `spam` sparse matrix
 #' @export
+#' @importFrom methods as
+#' @importFrom Matrix readMM
+#' @importFrom spam as.spam.dgCMatrix
 #'
 importLinv <- function(pth){
   # spam's built-in read.MM is slow for large matrices
   # use Matrix::readMM instead
 
-  dgT <- Matrix::readMM(pth)
+  dgT <- readMM(pth)
   # option to check input matrix class here
   #stopifnot(inherits(dgT, "dgTMatrix"))
   dgC <- as(dgT, "dgCMatrix") # conversion to spam has to go through dgCMatrix

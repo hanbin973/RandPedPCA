@@ -2,12 +2,19 @@
 % Please edit documentation in R/rppca.R
 \name{randRangeFinder}
 \alias{randRangeFinder}
-\title{Generate range matrix}
+\title{Generat range matrix for SVD}
 \usage{
 randRangeFinder(L, rank, depth, numVectors)
 }
+\arguments{
+\item{L}{a pedigree's L inverse matrix in sparse 'spam' format}
+
+\item{rank}{`integer` how many principal components to return}
+
+\item{depth}{`integer` number of iterations for generating the range matrix}
+
+\item{numVectors}{`integer` > `rank` to specify the oversampling for the}
+}
 \description{
-The efficiency of RandPedPCA relies on the fact that a relatively small
-matrix is decomposed instead of the original large L inverse. This function
-generates the range matrix.
+Generat range matrix for SVD
 }
