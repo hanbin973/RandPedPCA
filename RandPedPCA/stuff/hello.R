@@ -1,127 +1,58 @@
-# Hello, world!
-#
-# This is an example function named 'hello'
-# which prints 'Hello, world!'.
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   https://r-pkgs.org
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Install Package:           'Cmd + Shift + B'
-#   Check Package:             'Cmd + Shift + E'
-#   Test Package:              'Cmd + Shift + T'
-
-hello <- function() {
-  print("Hello, world!")
-}
-
-
-L <- spam::read.MM('~/git_repos/RandPedigreePCA/datasets/pedLInv.mtx')
-# K <- spam::read.MM('~/temp/pedLInv.mtx') # never finished
-rppca(L, method = "randSVD")
-rppca(L)
-rppca(L, method=123)
-
-ll <- Matrix::readMM('~/git_repos/RandPedigreePCA/datasets/pedLInv.mtx')
-kk <- Matrix::readMM('~/temp/pedLInv.mtx')
-typeof(kk)
-class(kk)
-kk
-mode(kk)
-
-ll
-L
-class(L)
-
-
-
-pc <- rppca(ll)
-t0 <- Sys.time()
-svdL <- randSVD(L, 10, 3, 15)
-Sys.time()- t0
-
-t0 <- Sys.time()
-svdll <- randSVD(ll, 10, 3, 15)
-Sys.time()- t0
-
-
-
-t0 <- Sys.time()
-kkk <- as(kk, "dgCMatrix")
-kkkk <-  as.spam.dgCMatrix(kkk)
-svdkk <- randSVD(kkkk, 10, 3, 15)
-Sys.time()- t0
-
-plot(pc$T[,1:2])
-MatrixClass(ll)
-Matrix::MatrixClass(kk)
-Matrix::MatrixClass(kkk)
-Matrix::MatrixClass(ll)
-Matrix::MatrixClass(L)
-getClassdef(L)
-getClassDef(L)
-
-
-
-
-Linv <- importLinv("~/temp/pedLInv.mtx")
+# Example to show that PCs 1 and 2 are swapped for a small example that can be
+# analysed in a naive way with R's built-in prcomp()
 
 # smaller simulation
-linv <- as.spam.dgCMatrix(as(readMM("~/git_repos/RandPedigreePCA/datasets/pedLInv.mtx"), "CsparseMatrix"))
+
+linv <- as.spam.dgCMatrix(as(readMM("../datasets/pedLInv.mtx"), "CsparseMatrix"))
 pc <- rppca(linv)
 plot(pc$scores[,1:2])
-# try  naive approach
-ainv <- readMM("~/git_repos/RandPedigreePCA/datasets/pedAInv.mtx")
+
+# try  naive approach, gat a inv matrix
+ainv <- readMM("../datasets/pedAInv.mtx")
 ainv[1:10, 1:10]
+
+# get a matrix
 aa <- solve(ainv)
-llt <- t(linv) %*% linv
-llti <- solve(llt)
 
-# aa imported and llti are essentially identical:
-all(zapsmall(llti - aa , digits = 10)==0)
-all(zapsmall(llti - aa , digits = 13)==0)
+# get a inv matrix also by multiplying L^I^T and L^I
+ltl <- t(linv) %*% linv
+# get a matrix
+ltli <- solve(llt)
 
-hist(as.vector(aa))
-
-# image(llti - aa) # takes a little time
-
-hist(as.vector(llti - aa))
-pcaa <- prcomp(aa, scale. = T)
-pcaaNoscale <- prcomp(aa, scale. = F)
-pcllti <- prcomp(llti, scale. = T)
-pcainvPrincomp <- princomp(aa)
-
-plot(pcaa$x[,1:2]) # somehow warped, 1 and 2 swapped
-plot(pcllti$x[,1:2])  # somehow warped, 1 and 2 swapped
-plot(pcainvPrincomp$scores[,1:2])  # not warped, 1 and 2 swapped
-
-plot(pcaaNoscale$x[,1:2]) # not warped, 1 and 2 swapped
-cor(pcaaNoscale$x[,1], pcaa$x[,1])
-cor(pcllti$x[,1], pcaa$x[,1])
-cor(pcaaNoscale$x[,1], pcainvPrincomp$scores[,1])
-cor(pcaaNoscale$x[,1], pc$scores[,1])
-cor(pcaaNoscale$x[,1], pc$scores[,2])
-ccors <- cor(pcaaNoscale$x[,1:10], pc$scores)
-ComplexHeatmap::Heatmap(as.matrix(ccors))
-cor(pcainv$x[,1], pc$scores[,1])
-cor(pcainv$x[,1], pc$scores[,2])
-cor(pcainv$x[,2], pc$scores[,1])
+# compare both A matrices
+all(zapsmall(ltli - aa , digits = 10)==0) # true
+all(zapsmall(ltli - aa , digits = 13)==0) # false, identical down to 12 digits
 
 
-pc <- rppca(Linv)
-pc$T
-smoothScatter(pc$T[,1:2])
+
+# compute built-in PCA on A matrix
+pcaaNoscale <- prcomp(aa)
+pclltiNoscale <- prcomp(ltli)
 
 
-svdObj <- randSVD(Linv, 10, 3, 15)
-u <- svdObj$u
-d <- svdObj$d
-dim(u)
-dim(d)
-length(d)
-TT <- u %*% diag(d)
-smoothScatter(TT[,1:2])
-?rppca
-?randSVD
+
+plot(pcaaNoscale$x[,1:2]) # 1 and 2 swapped
+plot(pcaaNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
+
+plot(pcltliNoscale$x[,1:2]) # 1 and 2 swapped
+plot(pcltliNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
+
+plot(pc$scores[,1:2]) # RandPed PCA
+
+# look into correlations between PCs computed by both methods
+pcCopy <- pc$scores # a copy of the RandPedPCA scores (to rename PCs to rPCs)
+dimnames(pcCopy)[[2]] <- paste0("r", dimnames(pcCopy)[[2]])
+
+# compute correlation matrix
+ccors <- as.matrix(cor(pcaaNoscale$x[,1:10], pcCopy))
+
+# visualise correlation matrix
+ComplexHeatmap::Heatmap(as.matrix(ccors),
+                        column_order = NULL,
+                        row_order = NULL,
+                        row_title = "prcomp (R built-in)",
+                        column_title = "RandPedPCA", name = "Corr. coef.")
+
+# variance components (built-in method)
+summary(pcaaNoscale)$importance[,1:10]
+
