@@ -56,3 +56,24 @@ ComplexHeatmap::Heatmap(as.matrix(ccors),
 # variance components (built-in method)
 summary(pcaaNoscale)$importance[,1:10]
 
+
+
+# Doubled pedigree (two unrelated pedigrees) ------------------------------
+
+
+L10 <- importLinv("../datasets/LInv10.mtx")
+
+L1010 <- importLinv("../datasets/LInv1010.mtx")
+
+
+pc10 <- rppca(L10)
+pc1010 <- rppca(L1010)
+
+
+
+plot(pc10$scores[,1:2])
+plot(pc1010$scores[,1:2])
+plot(pc1010$scores[,c(1,3)])
+plot(pc1010$scores[,c(1,4)])
+plot(pc1010$scores[,c(1,5)])
+plot(pc1010$scores[,c(1,6)])
