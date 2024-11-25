@@ -85,7 +85,8 @@ rppca <- function(L, method="randSVD", rank=10, depth=3, numVectors=15){
     rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
-    return(list(scores= scores
+    return(list(scores= scores,
+                d=rsvd$d
                 # Would be good to also return variance proportions.
                 # PCA usually returns loadings but not sure this makes sense
                 # here where we only have the loading of the range matrix?
