@@ -62,7 +62,18 @@ randSVD <- function(L, rank, depth, numVectors){
   return(list(u=U[,1:rank], d=D[1:rank], v=V[1:rank,]))
 }
 
-
+randTraceHutchinson <- function(L, numVectors){
+	dim <- nrow(L)
+	testVectors <- rnorm(n = dim * numVectors)
+	testMatrix <- matrix(testVectors, nrow = dim, ncol = numVectors)
+	testMatrixColNorms <- apply(testMatrix, 2, function(col) sqrt(sum(col^2)))
+	normTestMatrix <- sweep(testMatrix, 2, testMatrixColNorms, FUN="/") * sqrt(dim)
+	
+	Y <- spam::backsolve(t(L), normTestMatrix)
+	Y <- spam::forwardsolve(L, Y)
+	Ests <- colSums(Y * normTestMatrix)
+	return(mean(Ests))
+}
 
 #' PCA of pedigree L inverse sparse matrix
 #'
