@@ -62,17 +62,36 @@ randSVD <- function(L, rank, depth, numVectors){
   return(list(u=U[,1:rank], d=D[1:rank], v=V[1:rank,]))
 }
 
+#' Compute the number of vectors used for trace estimation
+#'
+#' Follows Skorski, M. (2021). Modern Analysis of Hutchinson’s Trace Estimator.
+#' 2021 55th Annual Conference on Information Sciences and Systems (CISS), 1–5.
+#' https://doi.org/10.1109/CISS50987.2021.9400306
+#'
+#' @param e `numeric` denoting the relative error margin
+#' @param d `numeric`. 1-d is the probability the the relative error is bounded
+#' by e.
+#'
+#' @return a scalar
+#' @export
+#'
+#' @examples
+getNumVectors <- function(e, d){
+  2*(2+8*sqrt(2)/3*e)*log(2/d)/e^2
+}
+
+#' @export
 randTraceHutchinson <- function(L, numVectors){
-	dim <- nrow(L)
-	testVectors <- rnorm(n = dim * numVectors)
-	testMatrix <- matrix(testVectors, nrow = dim, ncol = numVectors)
-	testMatrixColNorms <- apply(testMatrix, 2, function(col) sqrt(sum(col^2)))
-	normTestMatrix <- sweep(testMatrix, 2, testMatrixColNorms, FUN="/") * sqrt(dim)
-	
-	Y <- spam::backsolve(t(L), normTestMatrix)
-	Y <- spam::forwardsolve(L, Y)
-	Ests <- colSums(Y * normTestMatrix)
-	return(mean(Ests))
+  dim <- nrow(L)
+  testVectors <- rnorm(n = dim * numVectors)
+  testMatrix <- matrix(testVectors, nrow = dim, ncol = numVectors)
+  testMatrixColNorms <- apply(testMatrix, 2, function(col) sqrt(sum(col^2)))
+  normTestMatrix <- sweep(testMatrix, 2, testMatrixColNorms, FUN="/") * sqrt(dim)
+
+  Y <- spam::backsolve(t(L), normTestMatrix)
+  Y <- spam::forwardsolve(L, Y)
+  Ests <- colSums(Y * normTestMatrix)
+  return(mean(Ests))
 }
 
 #' PCA of pedigree L inverse sparse matrix
@@ -91,18 +110,19 @@ randTraceHutchinson <- function(L, numVectors){
 #'
 rppca <- function(L, method="randSVD", rank=10, depth=3, numVectors=15){
   #check L is the right kind of sparse matrix
-
-    if(method=="randSVD"){
+  nn <- dim(L)[1]
+  if(method=="randSVD"){
     rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
-    return(list(scores= scores,
-                d=rsvd$d
-                # Would be good to also return variance proportions.
-                # PCA usually returns loadings but not sure this makes sense
-                # here where we only have the loading of the range matrix?
-                )
-           )
+    pc <- list(x= scores,
+               sdev=rsvd$d / sqrt(max(1, nn-1)),
+               center=FALSE,
+               scale=FALSE#,
+               #rotation=rsvd$v
+    )
+    class(pc) <- "rppca"
+    return(pc)
 
   } else {
     stop(paste0("Method ", method," not implemented"))

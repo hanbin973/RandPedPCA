@@ -3,9 +3,17 @@
 
 # smaller simulation
 
-linv <- as.spam.dgCMatrix(as(readMM("../datasets/pedLInv.mtx"), "CsparseMatrix"))
+linv <- importLinv("../datasets/pedLInv.mtx")
 pc <- rppca(linv)
-plot(pc$scores[,1:2])
+class(pc)
+object.size(pc$x)
+plot(pc$x[,1:2])
+pc
+summary(pc)
+
+randTraceHutchinson(linv, numVectors = 40000)
+
+
 
 # try  naive approach, gat a inv matrix
 ainv <- readMM("../datasets/pedAInv.mtx")
@@ -13,7 +21,7 @@ ainv[1:10, 1:10]
 
 # get a matrix
 aa <- solve(ainv)
-
+Matrixmatrix.trace(aa)
 # get a inv matrix also by multiplying L^I^T and L^I
 ltl <- t(linv) %*% linv
 # get a matrix
@@ -30,7 +38,7 @@ pcaaNoscale <- prcomp(aa)
 pcaaNocenter <- prcomp(aa, center = F)
 pclltiNoscale <- prcomp(ltli)
 
-
+plot(sseq,sqrt(2)/(sseq-1))
 
 plot(pcaaNoscale$x[,1:2]) # 1 and 2 swapped
 plot(pcaaNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped

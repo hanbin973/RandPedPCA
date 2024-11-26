@@ -21,6 +21,6 @@ importLinv <- function(pth){
   dgT <- readMM(pth)
   # option to check input matrix class here
   #stopifnot(inherits(dgT, "dgTMatrix"))
-  dgC <- as(dgT, "dgCMatrix") # conversion to spam has to go through dgCMatrix
+  dgC <- as(dgT, "CsparseMatrix") # conversion to spam has to go through dgCMatrix
   return(as.spam.dgCMatrix(dgC))
 }
