@@ -4,6 +4,7 @@
 # smaller simulation
 
 linv <- importLinv("../datasets/pedLInv.mtx")
+dim(linv)
 pc <- rppca(linv)
 class(pc)
 object.size(pc$x)
@@ -21,11 +22,14 @@ ainv[1:10, 1:10]
 
 # get a matrix
 aa <- solve(ainv)
-Matrixmatrix.trace(aa)
+traa <- matrixcalc::matrix.trace(as.matrix(aa))
+
 # get a inv matrix also by multiplying L^I^T and L^I
 ltl <- t(linv) %*% linv
 # get a matrix
-ltli <- solve(llt)
+ltli <- solve(ltl)
+
+matrixcalc::matrix.trace(as.matrix(ltli))
 
 # compare both A matrices
 all(zapsmall(ltli - aa , digits = 10)==0) # true
