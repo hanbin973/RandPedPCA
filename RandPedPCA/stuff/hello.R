@@ -74,6 +74,12 @@ ComplexHeatmap::Heatmap(as.matrix(ccors2),
                         column_title = "RandPedPCA", name = "Corr. coef.")
 
 
+
+
+# Hutchinson --------------------------------------------------------------
+
+getNumVectorsHutchinson(.2, .95)
+
 # Doubled pedigree (two unrelated pedigrees) ------------------------------
 
 
@@ -115,9 +121,68 @@ summary(pcaaNocenter)$importance[,1:10]
 #  Standard deviation     0.2848558 0.2750638
 #  Proportion of Variance 0.0001500 0.0001400
 #  Cumulative Proportion  0.9968300 0.9969700
-pc$d
-#  [1] 888.65996 754.49060  72.27821  67.81399  32.01035  25.14347  21.42995  14.56372  12.50480
-#  [10]  12.15989
-sqrt(pc$d)
-#  [1] 29.810400 27.467992  8.501659  8.234925  5.657769  5.014326  4.629250  3.816244  3.536213
-#  [10]  3.487103
+pc$sdev
+# [1] 17.4314082 14.7996244  1.4178247  1.3302139  0.6318616  0.4974759  0.4243559  0.3244110  0.2563754  0.2230309
+
+
+sdSum <- sum(summary(pcaaNocenter)$importance[1,])
+# 67.61325
+varSum <- sum(summary(pcaaNocenter)$importance[1,]^2)
+# 529.3925
+
+summary(pcaaNocenter)$importance[1,1:10]^2/varSum
+# as prcomp
+
+# same again
+round(pc$sdev^2/varSum, 3)
+
+sum(diag(aa))
+# 3446.95
+sqrt(sum(diag(aa)))
+# 58.71073
+
+sum(diag(aa)) / sqrt(dim(aa)[1]-1) # same as sum of SDs from prcomp
+# 67.61325
+
+
+
+summary(pcaaNocenter)$importance[1,1:10]^2/ sum(diag(aa)) / sqrt(dim(aa)[1]-1)
+# far too low, is the trace not what we need?
+sum(diag(aa))
+# 3446.95
+
+3446.95 / sqrt(2599)
+# same as total sd from prcomp of A!
+# [1] 67.61326
+
+
+
+round(pc$sdev^2 / (sum(diag(aa)) / sqrt(2599))^2, 3)
+round(pc$sdev / (sum(diag(aa)) / sqrt(2599)), 3)
+pc$sdev^2 / sum(diag(aa)^2) / 2599
+
+aaColVar <- apply(aa, 2, var)
+plot(aaColVar)
+sum(aaColVar)
+image(aa)
+
+
+
+
+
+# Comparing pedigree matrices ---------------------------------------------
+
+# Matrix::writeMM(obj = pedA,    file = "pedA.mtx")
+# Matrix::writeMM(obj = pedAInv, file = "pedAInv.mtx")
+# Matrix::writeMM(obj = pedLInv, file = "pedLInv.mtx")
+
+
+
+AAi <- Matrix::readMM("../datasets/pedAInv.mtx")
+AA <- solve(AAi)
+Li <- Matrix::readMM("../datasets/pedLInv.mtx")
+image(AAi)
+image(AA)
+image(Li)
+sum(diag(AA))
+zapsmall(AA[1000:1010, 1000:1010])

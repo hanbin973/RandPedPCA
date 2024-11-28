@@ -9,13 +9,12 @@
 #' @param depth `integer` number of iterations for generating the range matrix
 #' @param numVectors `integer` > `rank` to specify the oversampling for the
 #'
-#' @return
+#' @return The range matrix for `randSVD`
 #' @export
 #'
 #' @importFrom spam backsolve
 #' @importFrom spam forwardsolve
 #' @importFrom stats rnorm
-#' @examples
 randRangeFinder <- function(L, rank, depth, numVectors){
   dim <- nrow(L)
   testVectors <- rnorm(n = dim * numVectors)
@@ -46,7 +45,6 @@ randRangeFinder <- function(L, rank, depth, numVectors){
 #' @export
 #'
 #' @importFrom spam backsolve
-#' @examples
 randSVD <- function(L, rank, depth, numVectors){
   # L: lower cholesky factor of animal matrix
   # rank: number of PCs
@@ -74,12 +72,22 @@ randSVD <- function(L, rank, depth, numVectors){
 #'
 #' @return a scalar
 #' @export
-#'
-#' @examples
-getNumVectors <- function(e, d){
+getNumVectorsHutchinson <- function(e, d){
   2*(2+8*sqrt(2)/3*e)*log(2/d)/e^2
 }
 
+
+#' Trace estimation for sparse L inverse matrices
+#'
+#' Using Hutchinson's method
+#'
+#' @param L A pedigree's L inverse matrix
+#' @param numVectors, an `integer` specifying how many random vectors to use
+#'
+#' The higher `numVectors`, the higher the accuracy and the longer the runtime.
+#' Accuracy can be estimated with the function `getNumVectorsHutchinson`.
+#'
+#' @return a scalar
 #' @export
 randTraceHutchinson <- function(L, numVectors){
   dim <- nrow(L)
@@ -96,31 +104,70 @@ randTraceHutchinson <- function(L, numVectors){
 
 #' PCA of pedigree L inverse sparse matrix
 #'
+#'
+#'
 #' @param L a pedigree's L inverse matrix in sparse `spam` format
 #' @param method `string` only randSVD (the default) is implemented
 #' @param rank  `integer` how many principal components to return
 #' @param depth `integer` number of iterations for generating the range matrix
 #' @param numVectors `integer` > `rank` to specify the oversampling for the
 #' range matrix
+#' @param nVecTraceEst `integer` number of random vectors to be used for
+#' relationship matrix trace estimation
+#' @param returnRotation `logical`whether or not to returen the rotation
+#' matrix, i.e. the right singulare values of the relationship matrix. FALSE by
+#' default.
 #'
-#' @return A `list` of one element, `scores`, the principal components
+#' The output slots are named like those if R's built in `prcomp` function.
+#' Rotation is not returned by default as it is the transpose of the PC scores,
+#' which are returned in `x`. `scale` and `center` are set to `FALSE`.
+#'
+#' @return A `list` containing:
+#' * `x`, the principal components,
+#' * `sdev`, the variance components of each PC. Note that the total variance is
+#' not known per se and this these components cannot be used to compute the
+#' proportion of the total variance accounted for by each PC. However, if
+#' `nVecTraceEst` is specified, `rppca` will estimate the total variance and
+#' return variance proportions.
+#' * `vProp` the estimated variance proportions accounted for by each PC.
+#' Only returned if `nVecTraceEst` is set.
+#' * `scale` always `FALSE`
+#' * `center` always `FALSE`
+#' * `rotation` the right singular values of the (implicit) relationship matrix.
+#' Only returned if `returnRotation == TRUE`
+#'
 #' @export
 #'
-#' @examples
+#' @examples rppca(pedLinv)
 #'
-rppca <- function(L, method="randSVD", rank=10, depth=3, numVectors=15){
+rppca <- function(L,
+                  method="randSVD",
+                  rank=10,
+                  depth=3,
+                  numVectors=15,
+                  nVecTraceEst,
+                  returnRotation=FALSE){
   #check L is the right kind of sparse matrix
   nn <- dim(L)[1]
   if(method=="randSVD"){
     rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
-    pc <- list(x= scores,
-               sdev=rsvd$d / sqrt(max(1, nn-1)),
-               center=FALSE,
-               scale=FALSE#,
-               #rotation=rsvd$v
-    )
+    if(returnRotation){
+      pc <- list(x= scores,
+                 sdev=rsvd$d / sqrt(max(1, nn-1)),
+                 center=FALSE,
+                 scale=FALSE,
+                 rotation=t(x)
+      )
+    } else {
+      pc <- list(x= scores,
+                 sdev=rsvd$d / sqrt(max(1, nn-1)),
+                 center=FALSE,
+                 scale=FALSE
+      )
+    }
+
     class(pc) <- "rppca"
     return(pc)
 

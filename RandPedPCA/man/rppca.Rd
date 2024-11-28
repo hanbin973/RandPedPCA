@@ -4,7 +4,15 @@
 \alias{rppca}
 \title{PCA of pedigree L inverse sparse matrix}
 \usage{
-rppca(L, method = "randSVD", rank = 10, depth = 3, numVectors = 15)
+rppca(
+  L,
+  method = "randSVD",
+  rank = 10,
+  depth = 3,
+  numVectors = 15,
+  nVecTraceEst,
+  returnRotation = FALSE
+)
 }
 \arguments{
 \item{L}{a pedigree's L inverse matrix in sparse `spam` format}
@@ -17,10 +25,37 @@ rppca(L, method = "randSVD", rank = 10, depth = 3, numVectors = 15)
 
 \item{numVectors}{`integer` > `rank` to specify the oversampling for the
 range matrix}
+
+\item{nVecTraceEst}{`integer` number of random vectors to be used for
+relationship matrix trace estimation}
+
+\item{`returnRotation`}{`logical`whether or not to returen the rotation
+matrix, i.e. the right singulare values of the relationship matrix. FALSE by
+default.
+
+The output slots are named like those if R's built in `prcomp` function.
+Rotation is not returned by default as it is the transpose of the PC scores,
+which are returned in `x`. `scale` and `center` are set to `FALSE`.}
 }
 \value{
-A `list` of one element, `scores`, the principal components
+A `list` containing:
+* `x`, the principal components,
+* `sdev`, the variance components of each PC. Note that the total variance is
+not known per se and this these components cannot be used to compute the
+proportion of the total variance accounted for by each PC. However, if
+`nVecTraceEst` is specified, `rppca` will estimate the total variance and
+return variance proportions.
+* `vProp` the estimated variance proportions accounted for by each PC.
+Only returned if `nVecTraceEst` is set.
+* `scale` always `FALSE`
+* `center` always `FALSE`
+* `rotation` the right singular values of the (implicit) relationship matrix.
+Only returned if `returnRotation == TRUE`
 }
 \description{
 PCA of pedigree L inverse sparse matrix
+}
+\examples{
+rppca(pedLinv)
+
 }

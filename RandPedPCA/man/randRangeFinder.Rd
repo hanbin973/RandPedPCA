@@ -15,6 +15,9 @@ randRangeFinder(L, rank, depth, numVectors)
 
 \item{numVectors}{`integer` > `rank` to specify the oversampling for the}
 }
+\value{
+The range matrix for `randSVD`
+}
 \description{
 Generat range matrix for SVD
 }
