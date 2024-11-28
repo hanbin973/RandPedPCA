@@ -160,3 +160,62 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+.Rproj.user
+
+
+###################################################
+# R development ###################################
+###################################################
+
+# History files
+RandPedPCA/.Rhistory
+RandPedPCA/.Rapp.history
+
+# Session Data files
+RandPedPCA/.RData
+RandPedPCA/.RDataTmp
+
+# User-specific files
+RandPedPCA/.Ruserdata
+
+# Example code in package build process
+RandPedPCA/*-Ex.R
+
+# Output files from R CMD build
+*.tar.gz
+
+# Output files from R CMD check
+RandPedPCA/*.Rcheck/
+
+# RStudio files
+RandPedPCA/.Rproj.user/
+
+# produced vignettes
+RandPedPCA/vignettes/*.html
+RandPedPCA/vignettes/*.pdf
+
+# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+RandPedPCA/.httr-oauth
+
+# knitr and R markdown default cache directories
+RandPedPCA/*_cache/
+RandPedPCA/cache/
+
+# Temporary files created by R markdown
+RandPedPCA/*.utf8.md
+RandPedPCA/*.knit.md
+
+# R Environment Variables
+RandPedPCA/.Renviron
+
+# pkgdown site
+RandPedPCA/docs/
+
+# translation temp files
+RandPedPCA/po/*~
+
+# RStudio Connect folder
+RandPedPCA/rsconnect/
+
+RandPedPCA.Rcheck/*
+
