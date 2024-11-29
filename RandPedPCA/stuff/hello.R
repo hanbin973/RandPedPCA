@@ -1,9 +1,17 @@
 # Example to show that PCs 1 and 2 are swapped for a small example that can be
 # analysed in a naive way with R's built-in prcomp()
 
+
+# Load data ---------------------------------------------------------------
+
+
 # smaller simulation
 
 linv <- importLinv("../datasets/pedLInv.mtx")
+
+dim(linv)
+pLab <- factor(read.table("../datasets/popLabel.csv", header = T)[,1])
+
 dim(linv)
 pc <- rppca(linv)
 class(pc)
@@ -40,6 +48,9 @@ all(zapsmall(ltli - aa , digits = 13)==0) # false, identical down to 12 digits
 # compute built-in PCA on A matrix
 pcaaNoscale <- prcomp(aa)
 pcaaNocenter <- prcomp(aa, center = F)
+summary(pcaaNocenter)$importance[,1:10]
+summary(pcaaNocenter)$importance[,1:4]
+
 pclltiNoscale <- prcomp(ltli)
 
 plot(sseq,sqrt(2)/(sseq-1))
@@ -47,11 +58,18 @@ plot(sseq,sqrt(2)/(sseq-1))
 plot(pcaaNoscale$x[,1:2]) # 1 and 2 swapped
 plot(pcaaNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
 
+plot(pcaaNocenter$x[,1:2], col=pLab)
+
+
 plot(pcltliNoscale$x[,1:2]) # 1 and 2 swapped
 plot(pcltliNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
 
-plot(pc$scores[,1:2]) # RandPed PCA
-
+plot(pc$x[,1:2], col=pLab) # RandPed PCA
+grid()
+legend("topright",
+       col=1:3,
+       pch=1,
+       legend=c("A", "AB", "B"))
 # look into correlations between PCs computed by both methods
 pcCopy <- pc$scores # a copy of the RandPedPCA scores (to rename PCs to rPCs)
 dimnames(pcCopy)[[2]] <- paste0("r", dimnames(pcCopy)[[2]])
@@ -72,6 +90,201 @@ ComplexHeatmap::Heatmap(as.matrix(ccors2),
                         row_order = NULL,
                         row_title = "prcomp (R built-in)",
                         column_title = "RandPedPCA", name = "Corr. coef.")
+
+ll <- solve(linv)
+
+prcompL <- prcomp(linv)
+plot(prcompLinv$x[,1:2], col=pLab)
+crLinv <- solve(crossprod(linv))
+image(aa)
+image(linv)
+image(crLinv)
+image(aa - crLinv)
+all(zapsmall(aa - crLinv)==0)
+
+chA <- chol(aa)
+chA
+image(chA)
+prcompCholA <- prcomp(chA, center = F)
+prcompCholAT <- prcomp(t(chA), center=F)
+plot(prcompCholA$x[,1:2],col=pLab)
+grid()
+legend("topleft",
+       col=1:3,
+       pch=1,
+       legend=c("A", "AB", "B"))
+plot(prcompCholA$rotation[,1:2],col=pLab)
+summary(prcompCholA)$importance[,1:10]
+summary(prcompCholAT)$importance[,1:10]
+summary(prcompCholAT)$importance[,1:4]
+summary(prcompCholA)$importance[,1:4]
+# probs the right one!!
+plot(prcompCholAT$x[,1:2],col=pLab)
+grid()
+legend("topright",
+       col=1:3,
+       pch=1,
+       legend=c("A", "AB", "B"))
+prcompCholAT$sdev[1:10]
+prcompCholAT$sdev[1:10]^2
+plot(prcompCholA$rotation[,1:2],col=pLab)
+sqrt(pc$sdev * sqrt(2599)) / sqrt(2599)
+zapsmall(summary(prcompCholA)$importance[1,1:10] - pc$sdev)
+sum(prcompCholA$sdev)
+sum(prcompCholAT$sdev)
+# both 35.14031
+
+sum(prcompCholAT$sdev^2)
+# 1.32626
+
+sqrt(2599)
+# 50.98039
+sum(diag(aa))
+# 50.98039
+
+hist(diag(aa))
+
+
+svdchA <- svd(t(chA))
+svdchA$d[1:10] / sqrt(2599)
+sum(svdchA$d^2) - sum(diag(aa))
+
+
+# What is the equivalent to X? --------------------------------------------
+
+
+linv
+pcli <- prcomp(linv)
+levels(pLab)
+plot(pcli$x[,1:2], col = pLab)
+plot(pcli$x[,2:3], col = pLab)
+plot(pcli$rotation[,1:2], col = pLab)
+dim(pcli$rotation)
+dim(pcli$x)
+summary(pcli)$importance[,1:10]
+
+
+eaa <- eigen(aa)
+length(eaa$values)
+dim(eaa$vectors)
+plot(eaa$vectors[,1:2], col =pLab)
+
+
+
+# More equivalences -------------------------------------------------------
+# individuals in rows, trait in cols
+# we are interested in relationships between individuals
+
+# iris dataset, dropping the labels
+i4 <- as.matrix(iris[,1:4])
+i4cent <- scale(i4, scale = F, center = T) # traits centered
+i4tcent <- scale(t(i4), scale = F, center = T) # inds centered
+# sds of the data
+sds <- apply(i4, 2, sd)
+# Sepal.Length  Sepal.Width Petal.Length  Petal.Width
+#    0.8280661    0.4358663    1.7652982    0.7622377
+sum(sds)
+# 3.791468
+# vars of the data cols
+vars <- apply(i4, 2, var)
+# Sepal.Length  Sepal.Width Petal.Length  Petal.Width
+#    0.6856935    0.1899794    3.1162779    0.5810063
+sum(vars)
+# 4.572957
+pci <- prcomp(i4)
+prci <- princomp(i4)
+summary(pci)
+sum(pci$sdev)
+sum(pci$sdev^2)
+# identical to orig data
+# 4.572957
+
+plot(pci$x[,1:2], col=iris$Species, main="prcomp") # good, for reference
+
+
+sum(prci$sdev^2)
+# again, sum is basically the same
+# 4.542471
+
+#plot(prci$scores[,1:2], col=iris$Species)
+plot(prci$scores[,1], -1* prci$scores[,2],
+     col=iris$Species,
+     main="princomp")                             # good too
+prci$center
+prci$scale
+
+
+# doing it "by hand"
+# we want to plot individuals and thus summarise traits we thus need a
+# covariance matrix of the traits
+# covariance matrices
+cMat1 <- crossprod(i4tcent) # cov mat of the inds (large)
+cMat2 <- crossprod(i4cent) # cov mat of the traits (small)
+
+
+# covariance matrices as used by princomp()
+cwt1 <- cov.wt(i4cent) # cov mat of traits (cols) thus small
+cwt2 <- cov.wt(i4tcent) # cov mat of inds (rows) thus larger
+dim(cwt1$cov)
+dim(cwt2$cov)
+cov.wt
+
+cMat1 / cwt2$cov
+
+cMat2 / cwt1$cov
+# the above a scaled by 1/n-1
+
+
+image(cMat1)
+image(cwt2$cov)
+e1 <- eigen(cMat1)
+e1wt <- eigen(cwt2$cov)
+dim(e1$vectors)
+
+plot(e1$vectors[,1:2], col=iris$Species,
+     main="Eigenvectors of individual cov mat") # strange
+
+
+# tried to scale cov mat as is done inside princomp
+plot(e1wt$vectors[,1], -1*e1wt$vectors[,2], col=iris$Species,
+     main="not sure")
+
+
+e2 <- eigen(cMat2)
+e2wt <- eigen(cwt1$cov)
+plot((i4cent %*% e2$vectors)[,1:2], col=iris$Species,
+     main="Centered iris data %*% ED od trait cov mat") # scale ok
+plot((i4cent %*% e2wt$vectors)[,1:2], col=iris$Species,
+     main="Centered iris data %*% ED od trait cov mat") # scale ok
+
+
+
+chol()
+
+ewt1 <- eigen(cwt1$cov)
+ewt2 <- eigen(cwt2$cov)
+ewt2$values[1:10]
+plot(ewt2$vectors[,1:2])
+plot((i4cent %*% ewt1$vectors)[,1:2], col=iris$Species)
+plot((t(i4cent) %*% ewt2$vectors)[,1:2])
+plot((t(i4cent) %*% ewt2$vectors)[1:2,])
+plot((ewt2$vectors %*% i4cent)[,1:2])
+plot((ewt2$vectors %*% i4cent)[1:2,])
+plot(ewt2$vectors[,1:2], col=iris$Species)
+
+# SVD
+isvd <- svd(i4cent)
+isvd$d
+sqrt(isvd$d)
+
+plot(isvd$u[,1:2], col=iris$Species, main="SVD (u) of centered iris data") # scale wrong, but identical to ED of individual cov mat
+
+isvd2 <- svd(cMat1)
+plot(isvd2$u[,1:2], col=iris$Species, main="SVD (u) of centered iris individual cov mat") # scale wrong, but identical to ED of individual cov mat
+plot(isvd2$v[,1:2])
+#ch <- chol(cMat1) # does not work
+
+
 
 
 

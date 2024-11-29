@@ -55,7 +55,7 @@ randSVD <- function(L, rank, depth, numVectors){
   C <- t(backsolve(t(L), Q))
   svdObject <- svd(C)
   U <- Q %*% svdObject$u
-  D <- svdObject$d ** 2
+  D <- svdObject$d #** 2 # make output match prcomp's
   V <- svdObject$v
   return(list(u=U[,1:rank], d=D[1:rank], v=V[1:rank,]))
 }
