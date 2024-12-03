@@ -102,71 +102,86 @@ randTraceHutchinson <- function(L, numVectors){
   return(mean(Ests))
 }
 
-#' PCA of pedigree L inverse sparse matrix
+#' Fast pedigree PCA using sparse matrices and random linear algebra
 #'
-#'
-#'
-#' @param L a pedigree's L inverse matrix in sparse `spam` format
+#' @param pdg A representation of a pedigree, see Details.
 #' @param method `string` only randSVD (the default) is implemented
 #' @param rank  `integer` how many principal components to return
 #' @param depth `integer` number of iterations for generating the range matrix
 #' @param numVectors `integer` > `rank` to specify the oversampling for the
 #' range matrix
-#' @param nVecTraceEst `integer` number of random vectors to be used for
+#' @param totVar `scalar` the total variance (trace of the relationship matrix,
+#' A)
 #' relationship matrix trace estimation
 #' @param returnRotation `logical`whether or not to returen the rotation
 #' matrix, i.e. the right singulare values of the relationship matrix. FALSE by
 #' default.
+#' @param ... optional arguments passed to methods
 #'
-#' The output slots are named like those if R's built in `prcomp` function.
+#' @details
+#' The output slots are named like those of R's built in `prcomp` function.
 #' Rotation is not returned by default as it is the transpose of the PC scores,
 #' which are returned in `x`. `scale` and `center` are set to `FALSE`.
 #'
-#' @return A `list` containing:
-#' * `x`, the principal components,
-#' * `sdev`, the variance components of each PC. Note that the total variance is
-#' not known per se and this these components cannot be used to compute the
-#' proportion of the total variance accounted for by each PC. However, if
-#' `nVecTraceEst` is specified, `rppca` will estimate the total variance and
-#' return variance proportions.
-#' * `vProp` the estimated variance proportions accounted for by each PC.
-#' Only returned if `nVecTraceEst` is set.
-#' * `scale` always `FALSE`
-#' * `center` always `FALSE`
-#' * `rotation` the right singular values of the (implicit) relationship matrix.
-#' Only returned if `returnRotation == TRUE`
-#'
-#' @export
+#' @returns
+#' A `list` containing:
+#' * the principal components
+#' * sdev, the variance components of each PC. Note that the total variance is
+#'   not known per se and this these components cannot be used to compute the
+#'   proportion of the total variance accounted for by each PC. However, if
+#'   `nVecTraceEst` is specified, `rppca` will estimate the total variance and
+#'   return variance proportions.
+#' * vProp, the estimated variance proportions accounted for by each PC.
+#'   Only returned if `totVar` is set.
+#' * scale, always `FALSE`
+#' * center, always `FALSE`
+#' * rotation, the right singular values of the (implicit) relationship matrix.
+#'   Only returned if `returnRotation == TRUE`
+#' * varProps, proportion of the total variance explained by each PC. Only
+#'   returned if starting from a pedigree object.
+#' @export rppca
+#' @rdname rppca
 #'
 #' @examples rppca(pedLinv)
 #'
-rppca <- function(L,
+rppca <- function(pdg, ...) UseMethod("rppca")
+
+
+
+#' @rdname rppca
+#' @method rppca spam
+#' @export
+rppca.spam <- function(pdg,
                   method="randSVD",
                   rank=10,
                   depth=3,
                   numVectors=15,
-                  nVecTraceEst,
-                  returnRotation=FALSE){
+                  returnRotation=FALSE,
+                  totVar,
+                  ...){
   #check L is the right kind of sparse matrix
-  nn <- dim(L)[1]
+  nn <- dim(pdg)[1]
   if(method=="randSVD"){
-    rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
+    rsvd = randSVD(pdg, rank=rank, depth=depth, numVectors=numVectors)
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
-    if(returnRotation){
-      pc <- list(x= scores,
-                 sdev=rsvd$d / sqrt(max(1, nn-1)),
-                 center=FALSE,
-                 scale=FALSE,
-                 rotation=t(x)
-      )
-    } else {
-      pc <- list(x= scores,
-                 sdev=rsvd$d / sqrt(max(1, nn-1)),
-                 center=FALSE,
-                 scale=FALSE
-      )
+
+    stdv <- rsvd$d
+
+
+    pc <- list(x= scores,
+               sdev=stdv / sqrt(max(1, nn-1)),
+               center=FALSE,
+               scale=FALSE
+    )
+
+    if(!missing(totVar)) {
+      vp <- stdv^2/totVar
+      names(vp) <- paste0("PC", 1:length(vp))
+      pc$varProps <- vp
     }
+    # return rotation only if requested
+    if(returnRotation) pc$rotation <- t(pc$x)
 
     class(pc) <- "rppca"
     return(pc)
@@ -176,3 +191,53 @@ rppca <- function(L,
   }
 }
 
+
+#' @rdname rppca
+#' @method rppca pedigree
+#' @export
+#' @importFrom pedigreeTools inbreeding getLInv
+rppca.pedigree <- function(pdg,
+                          method="randSVD",
+                          rank=10,
+                          depth=3,
+                          numVectors=15,
+                          returnRotation=FALSE,
+                          ...){
+  #check L is the right kind of sparse matrix
+
+
+  # get Linv
+  Lsp <- getLInv(pdg)
+  L <- sparse2spam(Lsp)
+  # get number of inds
+  nn <- dim(L)[1]
+  # total var is sum of (inbreeding coefs + 1)
+  totVar <- sum(inbreeding(pdg) + 1)
+  # get inbreeding+1 ->total variance
+
+  # return var components by default
+
+  if(method=="randSVD"){
+    rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
+    scores = rsvd$u %*% diag(rsvd$d)
+    dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
+    stdv <- rsvd$d
+    vp <- stdv^2/totVar
+    names(vp) <- paste0("PC", 1:length(vp))
+    pc <- list(x= scores,
+               sdev=stdv  / sqrt(max(1, nn-1)),
+               varProps=vp,
+               center=FALSE,
+               scale=FALSE
+    )
+
+    # return rotation only if requested
+    if(returnRotation) pc$rotation <- t(pc$x)
+
+    class(pc) <- "rppca"
+    return(pc)
+
+  } else {
+    stop(paste0("Method ", method," not implemented"))
+  }
+}

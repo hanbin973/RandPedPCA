@@ -8,19 +8,20 @@
 # smaller simulation
 
 linv <- importLinv("../datasets/pedLInv.mtx")
-
+#linvMM <- Matrix::readMM("../datasets/pedLInv.mtx")
 dim(linv)
 pLab <- factor(read.table("../datasets/popLabel.csv", header = T)[,1])
-
+class(linv)
 dim(linv)
 pc <- rppca(linv)
 class(pc)
 object.size(pc$x)
-plot(pc$x[,1:2])
+plot(pc$x[,1:2], col=pLab)
 pc
 summary(pc)
 
 randTraceHutchinson(linv, numVectors = 40000)
+
 
 
 
@@ -31,6 +32,9 @@ ainv[1:10, 1:10]
 # get a matrix
 aa <- solve(ainv)
 traa <- matrixcalc::matrix.trace(as.matrix(aa))
+
+
+pcTr <- rppca(linv,totVar=traa)
 
 # get a inv matrix also by multiplying L^I^T and L^I
 ltl <- t(linv) %*% linv
@@ -46,23 +50,23 @@ all(zapsmall(ltli - aa , digits = 13)==0) # false, identical down to 12 digits
 
 
 # compute built-in PCA on A matrix
-pcaaNoscale <- prcomp(aa)
-pcaaNocenter <- prcomp(aa, center = F)
-summary(pcaaNocenter)$importance[,1:10]
-summary(pcaaNocenter)$importance[,1:4]
-
-pclltiNoscale <- prcomp(ltli)
-
-plot(sseq,sqrt(2)/(sseq-1))
-
-plot(pcaaNoscale$x[,1:2]) # 1 and 2 swapped
-plot(pcaaNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
-
-plot(pcaaNocenter$x[,1:2], col=pLab)
-
-
-plot(pcltliNoscale$x[,1:2]) # 1 and 2 swapped
-plot(pcltliNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
+# pcaaNoscale <- prcomp(aa)
+# pcaaNocenter <- prcomp(aa, center = F)
+# summary(pcaaNocenter)$importance[,1:10]
+# summary(pcaaNocenter)$importance[,1:4]
+#
+# pclltiNoscale <- prcomp(ltli)
+#
+# plot(sseq,sqrt(2)/(sseq-1))
+#
+# plot(pcaaNoscale$x[,1:2]) # 1 and 2 swapped
+# plot(pcaaNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
+#
+# plot(pcaaNocenter$x[,1:2], col=pLab)
+#
+#
+# plot(pcltliNoscale$x[,1:2]) # 1 and 2 swapped
+# plot(pcltliNoscale$x[,2:1]) # alright if PCs 1 and 2 swapped
 
 plot(pc$x[,1:2], col=pLab) # RandPed PCA
 grid()
@@ -91,34 +95,38 @@ ComplexHeatmap::Heatmap(as.matrix(ccors2),
                         row_title = "prcomp (R built-in)",
                         column_title = "RandPedPCA", name = "Corr. coef.")
 
-ll <- solve(linv)
+#ll <- solve(linv) # does not work, go via Cholesky decomposition of A
 
-prcompL <- prcomp(linv)
-plot(prcompLinv$x[,1:2], col=pLab)
-crLinv <- solve(crossprod(linv))
-image(aa)
-image(linv)
-image(crLinv)
-image(aa - crLinv)
-all(zapsmall(aa - crLinv)==0)
+# prcompL <- prcomp(linv)
+# plot(prcompLinv$x[,1:2], col=pLab)
+# crLinv <- solve(crossprod(linv))
+# image(aa)
+# image(linv)
+# image(crLinv)
+# image(aa - crLinv)
+# all(zapsmall(aa - crLinv)==0)
 
 chA <- chol(aa)
 chA
 image(chA)
-prcompCholA <- prcomp(chA, center = F)
-prcompCholAT <- prcomp(t(chA), center=F)
-plot(prcompCholA$x[,1:2],col=pLab)
-grid()
-legend("topleft",
-       col=1:3,
-       pch=1,
-       legend=c("A", "AB", "B"))
-plot(prcompCholA$rotation[,1:2],col=pLab)
-summary(prcompCholA)$importance[,1:10]
+#prcompCholA <- prcomp(chA, center = F)
+prcompCholAT <- prcomp(t(chA), center=F, scale. = F)
+# plot(prcompCholA$x[,1:2],col=pLab)
+# grid()
+# legend("topleft",
+#        col=1:3,
+#        pch=1,
+#        legend=c("A", "AB", "B"))
+#
+#
+# plot(prcompCholA$rotation[,1:2],col=pLab)
+# summary(prcompCholA)$importance[,1:10]
 summary(prcompCholAT)$importance[,1:10]
 summary(prcompCholAT)$importance[,1:4]
-summary(prcompCholA)$importance[,1:4]
-# probs the right one!!
+
+
+
+# this is the right one!! (chA is the upper factor, must be transposed)
 plot(prcompCholAT$x[,1:2],col=pLab)
 grid()
 legend("topright",
@@ -137,6 +145,9 @@ sum(prcompCholAT$sdev)
 sum(prcompCholAT$sdev^2)
 # 1.32626
 
+pc$sdev
+
+prcompCholAT$sdev[1:10]
 sqrt(2599)
 # 50.98039
 sum(diag(aa))
@@ -154,7 +165,12 @@ sum(svdchA$d^2) - sum(diag(aa))
 
 
 linv
+dim(linv)
 pcli <- prcomp(linv)
+
+sum(pcli$sdev)
+sum(pcli$sdev^2)
+
 levels(pLab)
 plot(pcli$x[,1:2], col = pLab)
 plot(pcli$x[,2:3], col = pLab)
@@ -168,6 +184,28 @@ eaa <- eigen(aa)
 length(eaa$values)
 dim(eaa$vectors)
 plot(eaa$vectors[,1:2], col =pLab)
+
+
+# SVD on L
+svdchA <- svd(t(chA))
+
+svdchA$u[1:5, 1:5]
+svdchA$v[1:5, 1:5]
+svdchA$d[1:5]
+# eigen decomp on A
+eA <- eigen(aa)
+eA$vectors[1:5, 1:5]
+eA$values[1:5]
+sqrt(eA$values[1:5])
+all(zapsmall(svdchA$u - eA$vectors, digits = 6) == 0)
+
+image(svdchA$u)
+image(eA$vectors)
+
+ccc <- cor(svdchA$u, eA$vectors)
+image(ccc)
+
+
 
 
 
@@ -192,6 +230,11 @@ vars <- apply(i4, 2, var)
 sum(vars)
 # 4.572957
 pci <- prcomp(i4)
+pciNN <- prcomp(i4, center = F, scale. = F)
+pci$center
+pci$scale
+pciNN$center
+pciNN$scale
 prci <- princomp(i4)
 summary(pci)
 sum(pci$sdev)
@@ -399,3 +442,71 @@ image(AA)
 image(Li)
 sum(diag(AA))
 zapsmall(AA[1000:1010, 1000:1010])
+
+
+
+# Computing the total variance from a pedigree ----------------------------
+library(pedigreeTools)
+
+metaData <- read.table("../datasets/pedMeta.csv",
+                       header=T,
+                       sep=",")
+head(metaData)
+
+ped <- pedigree(sire  = metaData$fid,
+                dam   = metaData$mid,
+                label = metaData$id)
+
+ped
+inbr <- inbreeding(ped)
+pedA <- getA(ped)
+plot( inbr, diag(as.matrix(pedA)))
+abline(1,1, col=2)
+sum(inbr+1)
+
+
+pc2 <- rppca(ped)
+plot(pc2$x[,1:2], col=factor(metaData$population))
+pc2$sdev^2
+
+pc2$sdev
+pc$sdev
+pc2$varProps
+sum(diag(aa))
+# 3549.629
+svdChA <- svd(chA)
+sum(svdChA$d)
+# 1797.833
+sum(svdChA$d^2)
+# 3549.629 (as diag sum of A)
+
+(pc2$sdev * sqrt(2649))^2 / sum(svdChA$d^2)
+pc2$sdev^2 * 2649 / sum(svdChA$d^2)
+
+summary(prcompCholAT)$importance[,1:10]
+
+pcaaNocenter$sdev[1:10]
+#summary(prcompCholAT)$importance[,1:10] # dont want that!, wrong input (A insted of L)
+sum(prcompCholAT$sdev^2) * sqrt(2599)
+
+
+# Matrix conversions ------------------------------------------------------
+
+llii <- getLInv(ped) # dtCMatrix
+lliiCsparse <- as(llii, "CsparseMatrix")
+class(llii)
+linvMM # readMM returns dgTMatrix
+class(linvMM)
+class(lliiCsparse)
+
+
+
+as(llii, "CsparseMatrix") # returns dtCMatrix
+as(linvMM, "CsparseMatrix") # returns dgCMatrix
+as.spam.dgCMatrix(as(llii, "dgCMatrix"))
+as.spam.dgCMatrix(as(llii, "CsparseMatrix"))
+as.spam.dgCMatrix(as(linvMM, "dgCMatrix"))
+as.spam.dgCMatrix(as(linvMM, "CsparseMatrix"))
+?as.spam.dgCMatrix
+?as
+showMethods(coerce)

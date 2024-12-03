@@ -2,20 +2,37 @@
 % Please edit documentation in R/rppca.R
 \name{rppca}
 \alias{rppca}
-\title{PCA of pedigree L inverse sparse matrix}
+\alias{rppca.spam}
+\alias{rppca.pedigree}
+\title{Fast pedigree PCA using sparse matrices and random linear algebra}
 \usage{
-rppca(
-  L,
+rppca(pdg, ...)
+
+\method{rppca}{spam}(
+  pdg,
   method = "randSVD",
   rank = 10,
   depth = 3,
   numVectors = 15,
-  nVecTraceEst,
-  returnRotation = FALSE
+  returnRotation = FALSE,
+  totVar,
+  ...
+)
+
+\method{rppca}{pedigree}(
+  pdg,
+  method = "randSVD",
+  rank = 10,
+  depth = 3,
+  numVectors = 15,
+  returnRotation = FALSE,
+  ...
 )
 }
 \arguments{
-\item{L}{a pedigree's L inverse matrix in sparse `spam` format}
+\item{pdg}{A representation of a pedigree, see Details.}
+
+\item{...}{optional arguments passed to methods}
 
 \item{method}{`string` only randSVD (the default) is implemented}
 
@@ -26,34 +43,38 @@ rppca(
 \item{numVectors}{`integer` > `rank` to specify the oversampling for the
 range matrix}
 
-\item{nVecTraceEst}{`integer` number of random vectors to be used for
-relationship matrix trace estimation}
-
-\item{`returnRotation`}{`logical`whether or not to returen the rotation
+\item{returnRotation}{`logical`whether or not to returen the rotation
 matrix, i.e. the right singulare values of the relationship matrix. FALSE by
-default.
+default.}
 
-The output slots are named like those if R's built in `prcomp` function.
-Rotation is not returned by default as it is the transpose of the PC scores,
-which are returned in `x`. `scale` and `center` are set to `FALSE`.}
+\item{totVar}{`scalar` the total variance (trace of the relationship matrix,
+A)
+relationship matrix trace estimation}
 }
 \value{
 A `list` containing:
-* `x`, the principal components,
-* `sdev`, the variance components of each PC. Note that the total variance is
-not known per se and this these components cannot be used to compute the
-proportion of the total variance accounted for by each PC. However, if
-`nVecTraceEst` is specified, `rppca` will estimate the total variance and
-return variance proportions.
-* `vProp` the estimated variance proportions accounted for by each PC.
-Only returned if `nVecTraceEst` is set.
-* `scale` always `FALSE`
-* `center` always `FALSE`
-* `rotation` the right singular values of the (implicit) relationship matrix.
-Only returned if `returnRotation == TRUE`
+* the principal components
+* sdev, the variance components of each PC. Note that the total variance is
+  not known per se and this these components cannot be used to compute the
+  proportion of the total variance accounted for by each PC. However, if
+  `nVecTraceEst` is specified, `rppca` will estimate the total variance and
+  return variance proportions.
+* vProp, the estimated variance proportions accounted for by each PC.
+  Only returned if `totVar` is set.
+* scale, always `FALSE`
+* center, always `FALSE`
+* rotation, the right singular values of the (implicit) relationship matrix.
+  Only returned if `returnRotation == TRUE`
+* varProps, proportion of the total variance explained by each PC. Only
+  returned if starting from a pedigree object.
 }
 \description{
-PCA of pedigree L inverse sparse matrix
+Fast pedigree PCA using sparse matrices and random linear algebra
+}
+\details{
+The output slots are named like those of R's built in `prcomp` function.
+Rotation is not returned by default as it is the transpose of the PC scores,
+which are returned in `x`. `scale` and `center` are set to `FALSE`.
 }
 \examples{
 rppca(pedLinv)

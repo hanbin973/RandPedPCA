@@ -19,8 +19,21 @@ importLinv <- function(pth){
   # use Matrix::readMM instead
 
   dgT <- readMM(pth)
-  # option to check input matrix class here
-  #stopifnot(inherits(dgT, "dgTMatrix"))
-  dgC <- as(dgT, "CsparseMatrix") # conversion to spam has to go through dgCMatrix
+
+  sparse2spam(dgT)
+}
+
+#' Convert generic sparse matrix to spam format
+#'
+#' @param sprs A sparse matrix.
+#'
+#' @return A `spam` sparse matrix
+#' @export
+#' @importFrom methods as
+#' @importFrom spam as.spam.dgCMatrix
+sparse2spam <- function(sprs){
+  dgC <- as(sprs, "dgCMatrix") # conversion to spam has to go through dgCMatrix
   return(as.spam.dgCMatrix(dgC))
 }
+
+
