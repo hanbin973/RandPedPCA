@@ -243,7 +243,7 @@ sum(pci$sdev^2)
 # 4.572957
 
 plot(pci$x[,1:2], col=iris$Species, main="prcomp") # good, for reference
-
+plot(pciNN$x[,1:2], col=iris$Species, main="prcompNN") # not so good, centering matters
 
 sum(prci$sdev^2)
 # again, sum is basically the same
@@ -252,7 +252,7 @@ sum(prci$sdev^2)
 #plot(prci$scores[,1:2], col=iris$Species)
 plot(prci$scores[,1], -1* prci$scores[,2],
      col=iris$Species,
-     main="princomp")                             # good too
+     main="princomp")                             # good too, i.e. princomp with ED works too
 prci$center
 prci$scale
 
@@ -285,20 +285,20 @@ e1wt <- eigen(cwt2$cov)
 dim(e1$vectors)
 
 plot(e1$vectors[,1:2], col=iris$Species,
-     main="Eigenvectors of individual cov mat") # strange
+     main="Eigenvectors of individual cov mat") # wrong patterns
 
 
 # tried to scale cov mat as is done inside princomp
-plot(e1wt$vectors[,1], -1*e1wt$vectors[,2], col=iris$Species,
+plot(e1wt$vectors[,1], e1wt$vectors[,2], col=iris$Species, # same here, wrong patterns
      main="not sure")
 
 
 e2 <- eigen(cMat2)
 e2wt <- eigen(cwt1$cov)
 plot((i4cent %*% e2$vectors)[,1:2], col=iris$Species,
-     main="Centered iris data %*% ED od trait cov mat") # scale ok
+     main="Centered iris data %*% ED od trait cov mat") # good, scale ok
 plot((i4cent %*% e2wt$vectors)[,1:2], col=iris$Species,
-     main="Centered iris data %*% ED od trait cov mat") # scale ok
+     main="Centered iris data %*% ED od trait cov mat") # good, scale ok
 
 
 
@@ -314,21 +314,43 @@ plot((t(i4cent) %*% ewt2$vectors)[1:2,])
 plot((ewt2$vectors %*% i4cent)[,1:2])
 plot((ewt2$vectors %*% i4cent)[1:2,])
 plot(ewt2$vectors[,1:2], col=iris$Species)
+plot((ewt2$vectors %*% diag(ewt2$values))[,1:2])
 
+plot(ewt1$vectors[,1:2])
+plot(ewt2$vectors[,1:2])
 # SVD
 isvd <- svd(i4cent)
+
+icovsvd <- svd(cwt2$cov)
+
+isvd$u
+isvd$v
 isvd$d
 sqrt(isvd$d)
 
-plot(isvd$u[,1:2], col=iris$Species, main="SVD (u) of centered iris data") # scale wrong, but identical to ED of individual cov mat
 
+
+plot((isvd$u)[,1:2], col=iris$Species, main="SVD (u) of centered iris data") # scale wrong, but identical to ED of individual cov mat
+plot((isvd$u %*% diag(isvd$d))[,1:2], col=iris$Species, main="SVD (u) of centered iris data") # scale correct
 isvd2 <- svd(cMat1)
-plot(isvd2$u[,1:2], col=iris$Species, main="SVD (u) of centered iris individual cov mat") # scale wrong, but identical to ED of individual cov mat
+plot(isvd2$u[,1:2], col=iris$Species, main="SVD (u) of centered iris individual cov mat") # pattern wrong, identical to ED of individual cov mat
 plot(isvd2$v[,1:2])
+
+plot((icovsvd$u)[,1:2], col=iris$Species) # pattern wrong again
+plot((icovsvd$u %*% diag(icovsvd$d))[,1:2]) # just changes scale
+
 #ch <- chol(cMat1) # does not work
+chol(cwt2$cov)
+
+solve(cMat1) # singular, it is its own inverse
+
+
+#chCmat1 <- chol(cMat1[1:10, 1:10]) # does not work, 7th leading minor is negative
 
 
 
+
+solve(matrix(c(2,1,1,2), nrow=2))
 
 
 
@@ -493,6 +515,7 @@ sum(prcompCholAT$sdev^2) * sqrt(2599)
 # Matrix conversions ------------------------------------------------------
 
 llii <- getLInv(ped) # dtCMatrix
+get
 lliiCsparse <- as(llii, "CsparseMatrix")
 class(llii)
 linvMM # readMM returns dgTMatrix
@@ -510,3 +533,11 @@ as.spam.dgCMatrix(as(linvMM, "CsparseMatrix"))
 ?as.spam.dgCMatrix
 ?as
 showMethods(coerce)
+
+
+# rppca on L --------------------------------------------------------------
+
+ll <- sparse2spam(getL(ped))
+pcll <- rppca(ll)
+plot(pcll$x[,1:2])
+
