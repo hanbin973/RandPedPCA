@@ -14,20 +14,11 @@ rppca(pdg, ...)
   rank = 10,
   depth = 3,
   numVectors = 15,
-  returnRotation = FALSE,
-  totVar,
+  totVar = NULL,
   ...
 )
 
-\method{rppca}{pedigree}(
-  pdg,
-  method = "randSVD",
-  rank = 10,
-  depth = 3,
-  numVectors = 15,
-  returnRotation = FALSE,
-  ...
-)
+\method{rppca}{pedigree}(pdg, method = "randSVD", rank = 10, depth = 3, numVectors = 15, ...)
 }
 \arguments{
 \item{pdg}{A representation of a pedigree, see Details.}
@@ -43,13 +34,8 @@ rppca(pdg, ...)
 \item{numVectors}{`integer` > `rank` to specify the oversampling for the
 range matrix}
 
-\item{returnRotation}{`logical`whether or not to returen the rotation
-matrix, i.e. the right singulare values of the relationship matrix. FALSE by
-default.}
-
-\item{totVar}{`scalar` the total variance (trace of the relationship matrix,
-A)
-relationship matrix trace estimation}
+\item{totVar}{`scalar` (optional) the total variance, required for
+computation of variance proportions when using an L-inverse matrix a input}
 }
 \value{
 A `list` containing:

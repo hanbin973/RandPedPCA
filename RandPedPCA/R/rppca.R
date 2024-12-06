@@ -110,12 +110,8 @@ randTraceHutchinson <- function(L, numVectors){
 #' @param depth `integer` number of iterations for generating the range matrix
 #' @param numVectors `integer` > `rank` to specify the oversampling for the
 #' range matrix
-#' @param totVar `scalar` the total variance (trace of the relationship matrix,
-#' A)
-#' relationship matrix trace estimation
-#' @param returnRotation `logical`whether or not to returen the rotation
-#' matrix, i.e. the right singulare values of the relationship matrix. FALSE by
-#' default.
+#' @param totVar `scalar` (optional) the total variance, required for
+#' computation of variance proportions when using an L-inverse matrix a input
 #' @param ... optional arguments passed to methods
 #'
 #' @details
@@ -156,10 +152,10 @@ rppca.spam <- function(pdg,
                   rank=10,
                   depth=3,
                   numVectors=15,
-                  returnRotation=FALSE,
-                  totVar,
+                  totVar=NULL,
                   ...){
   #check L is the right kind of sparse matrix
+  returnRotation=TRUE
   nn <- dim(pdg)[1]
   if(method=="randSVD"){
     rsvd = randSVD(pdg, rank=rank, depth=depth, numVectors=numVectors)
@@ -201,10 +197,9 @@ rppca.pedigree <- function(pdg,
                           rank=10,
                           depth=3,
                           numVectors=15,
-                          returnRotation=FALSE,
                           ...){
   #check L is the right kind of sparse matrix
-
+  returnRotation=TRUE
 
   # get Linv
   Lsp <- getLInv(pdg)
@@ -241,3 +236,28 @@ rppca.pedigree <- function(pdg,
     stop(paste0("Method ", method," not implemented"))
   }
 }
+
+
+#' @method summary rppca
+#' @export
+summary.rppca <- function(object, ...){
+  chkDots(...)
+  if(is.null(object$varProps)){
+    warning("Input does not contain information on variance components. Consider
+running rppca on a pedigree object or supplying an estimate of the total
+variance of the data.")
+    importance <- rbind("Standard deviation" = object$sdev)
+  } else {
+    importance <- rbind("Standard deviation" = object$sdev,
+                        "Proportion of Variance" = object$varProps,
+                        "Cumulative Proportion" = round(cumsum(object$varProps),
+                                                        5)
+                        )
+  }
+
+  colnames(importance) <- colnames(object$x)
+  object$importance <- importance
+  class(object) <- "summary.prcomp"
+  object
+}
+

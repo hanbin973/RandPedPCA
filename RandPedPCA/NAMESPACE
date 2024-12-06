@@ -2,6 +2,7 @@
 
 S3method(rppca,pedigree)
 S3method(rppca,spam)
+S3method(summary,rppca)
 export(getNumVectorsHutchinson)
 export(importLinv)
 export(randRangeFinder)

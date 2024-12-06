@@ -12,7 +12,6 @@
 #' @export
 #' @importFrom methods as
 #' @importFrom Matrix readMM
-#' @importFrom spam as.spam.dgCMatrix
 #'
 importLinv <- function(pth){
   # spam's built-in read.MM is slow for large matrices

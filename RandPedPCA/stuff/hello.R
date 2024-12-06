@@ -468,6 +468,11 @@ zapsmall(AA[1000:1010, 1000:1010])
 
 
 # Computing the total variance from a pedigree ----------------------------
+
+linv <- importLinv("../datasets/pedLInv.mtx")
+pLab <- factor(read.table("../datasets/popLabel.csv", header = T)[,1])
+pc <- rppca(linv)
+
 library(pedigreeTools)
 
 metaData <- read.table("../datasets/pedMeta.csv",
@@ -479,6 +484,40 @@ ped <- pedigree(sire  = metaData$fid,
                 dam   = metaData$mid,
                 label = metaData$id)
 
+ped2 <- pedigree(sire  = pedMeta$fid,
+                 dam   = pedMeta$mid,
+                 label = pedMeta$id)
+tail(pedMeta$id)
+head(pedMeta$id)
+rppca(ped2)
+li2 <- pedigreeTools::getLInv(ped2)
+class(li2) # dtCMatrix
+
+
+li2dgC <- as(li2, "dgCMatrix")
+class(li2dgC)
+a <- rppca(as.spam.dgCMatrix(li2dgC))
+summary(a)
+b <- rppca(ped2)
+summary(b)
+
+summary(pedMeta$fid)
+all(pedMeta$fid %in% c(pedMeta$id, 0))
+pedMeta$fid[which(!(pedMeta$fid %in% c(pedMeta$id, 0)))]
+all(metaData$fid %in% c(metaData$id, 0))
+
+pedigree
+metaData$fid[which(!(metaData$fid %in% c(metaData$id, 0, NA)))]
+metaData$mid[which(!(metaData$mid %in% c(metaData$id, 0, NA)))]
+metaData$fid[which(!metaData$fid %in% c(metaData$id, 0, NA))]
+all(metaData$mid %in% c(metaData$id, 0, NA))
+all(metaData$fid %in% c(metaData$id, 0, NA))
+
+pedigree
+
+pc01 <- rppca(pedLinv)
+plot(pc01$x[,1:2])
+plot(pc$x[,1:2])
 ped
 inbr <- inbreeding(ped)
 pedA <- getA(ped)
@@ -491,6 +530,13 @@ pc2 <- rppca(ped)
 plot(pc2$x[,1:2], col=factor(metaData$population))
 pc2$sdev^2
 
+a <- summary(pc)
+class(a)
+print(a$importance, digits=3)
+print(b$importance, digits=3)
+invisible(a)
+b <- summary(pc2)
+class(b)
 pc2$sdev
 pc$sdev
 pc2$varProps
@@ -535,9 +581,34 @@ as.spam.dgCMatrix(as(linvMM, "CsparseMatrix"))
 showMethods(coerce)
 
 
-# rppca on L --------------------------------------------------------------
-
 ll <- sparse2spam(getL(ped))
-pcll <- rppca(ll)
-plot(pcll$x[,1:2])
+image(ll)
+image(t(ll))
+pcll <- prcomp(ll, center = F)
+pcllt <- prcomp(t(ll), center = F)
+plot(pcll$x[,1:2], col=pLab)
+plot(pcllt$x[,1:2], col=pLab)
+
+summary(pcllt)$importance[1,1:10]
+pc$sdev
+pc2 <- rppca(ped)
+pc2$sdev
+
+summary(pcllt)$importance[2,1:10]
+pc2$varProps
+
+
+# PCA with wipedA# PCA with wide matrix ----------------------------------------------------
+
+prcompI4t <- prcomp(t(i4), center = F)
+plot(prcompI4t$x[,1:2])
+
+svdI4t <- svd(t(i4))
+dim(svdI4t$u)
+dim(svdI4t$v)
+plot(svdI4t$u[,1:2])
+plot(svdI4t$v[,1:2])
+princomp(t(i4))
+
+i4tcent
 
