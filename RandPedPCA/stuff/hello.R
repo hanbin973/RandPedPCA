@@ -560,15 +560,52 @@ sum(prcompCholAT$sdev^2) * sqrt(2599)
 
 # Matrix conversions ------------------------------------------------------
 
-llii <- getLInv(ped) # dtCMatrix
-get
-lliiCsparse <- as(llii, "CsparseMatrix")
-class(llii)
+ped2 <- pedigree(sire  = pedMeta$fid,
+                 dam   = pedMeta$mid,
+                 label = pedMeta$id)
+a<- rppca(ped2)
+summary(a)
+a$sdev
+a$varProps
+llii <- getLInv(ped2) # dtCMatrix
+class(llii) # dtCMatrix
+linvMM <- Matrix::readMM("../datasets/pedLInv.mtx")
+class(linvMM) # dgTMatrix
+lliiCsparse <- as(llii, "CsparseMatrix") # if takem from ped, it does not work, old method required
+lliiCsparse2 <- as(llii, "dgCMatrix") # if takem from ped, it does not work, old method required
+b <- rppca(sparse2spam(lliiCsparse2))
+cc <- rppca(sparse2spam(lliiCsparse2), totVar = 3500)
+
+a$sdev
+b$sdev
+cc$sdev
+
+a$varProp
+b$varProp
+cc$varProp
+
+summary(a)
+summary(b)
+summary(cc)
+
+class(lliiCsparse) # still a dtCMatrix
+class(lliiCsparse2) # dgCMatrix
+
+sparse2spam(llii)
+
 linvMM # readMM returns dgTMatrix
-class(linvMM)
+class(linvMM)# dgTMatrix
+lliiMMCsparse <- as(linvMM, "CsparseMatrix")
+class(lliiMMCsparse) # dgCMatrix
+lliiMMCsparse2 <- as(linvMM, "dgCMatrix")
+class(lliiMMCsparse2) # dgCMatrix
 class(lliiCsparse)
-
-
+sparse2spam(lliiMM)
+rppca(ped2)
+sparse2spam(lliiCsparse)
+sparse2spam(lliiCsparse2)
+sparse2spam(lliiMMCsparse)
+sparse2spam(lliiMMCsparse2)
 
 as(llii, "CsparseMatrix") # returns dtCMatrix
 as(linvMM, "CsparseMatrix") # returns dgCMatrix
@@ -576,7 +613,9 @@ as.spam.dgCMatrix(as(llii, "dgCMatrix"))
 as.spam.dgCMatrix(as(llii, "CsparseMatrix"))
 as.spam.dgCMatrix(as(linvMM, "dgCMatrix"))
 as.spam.dgCMatrix(as(linvMM, "CsparseMatrix"))
-?as.spam.dgCMatrix
+
+
+
 ?as
 showMethods(coerce)
 
@@ -611,4 +650,36 @@ plot(svdI4t$v[,1:2])
 princomp(t(i4))
 
 i4tcent
+
+
+# visualise pedigree ------------------------------------------------------
+pm <- pedMeta
+pm$generation
+xList <- sapply(do.call(seq, as.list(range(pm$generation))), function(x){
+  seq(1, sum(pm$generation == x))
+})
+
+pm$xvals <- unlist(xList)
+
+plot(x=pm$xvals,
+     y=pm$generation)
+head(pm)
+for(ll in 1:nrow(pm)){
+  if((!is.na(pm$fid[ll])) && (pm$fid[ll]!=0)){
+
+    fInd <- which(pm$id == pm$fid[ll])
+    lines(c(pm$xvals[ll], pm$xvals[fInd]),
+          c(pm$generation[ll], pm$generation[fInd]),
+          col=4)
+  }
+
+  if((!is.na(pm$mid[ll])) && (pm$mid[ll]!=0)){
+
+    mInd <- which(pm$id == pm$mid[ll])
+    lines(c(pm$xvals[ll], pm$xvals[mInd]),
+          c(pm$generation[ll], pm$generation[mInd]),
+          col=2)
+  }
+
+}
 

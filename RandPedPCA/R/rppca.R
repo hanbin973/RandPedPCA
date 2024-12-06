@@ -71,7 +71,6 @@ randSVD <- function(L, rank, depth, numVectors){
 #' by e.
 #'
 #' @return a scalar
-#' @export
 getNumVectorsHutchinson <- function(e, d){
   2*(2+8*sqrt(2)/3*e)*log(2/d)/e^2
 }
@@ -88,7 +87,6 @@ getNumVectorsHutchinson <- function(e, d){
 #' Accuracy can be estimated with the function `getNumVectorsHutchinson`.
 #'
 #' @return a scalar
-#' @export
 randTraceHutchinson <- function(L, numVectors){
   dim <- nrow(L)
   testVectors <- rnorm(n = dim * numVectors)
@@ -163,7 +161,7 @@ rppca.spam <- function(pdg,
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
 
     stdv <- rsvd$d
-
+    names(stdv) <- paste0("PC", 1:length(stdv))
 
     pc <- list(x= scores,
                sdev=stdv / sqrt(max(1, nn-1)),
@@ -217,6 +215,7 @@ rppca.pedigree <- function(pdg,
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
     stdv <- rsvd$d
+    names(stdv) <- paste0("PC", 1:length(stdv))
     vp <- stdv^2/totVar
     names(vp) <- paste0("PC", 1:length(vp))
     pc <- list(x= scores,
@@ -250,7 +249,7 @@ variance of the data.")
   } else {
     importance <- rbind("Standard deviation" = object$sdev,
                         "Proportion of Variance" = object$varProps,
-                        "Cumulative Proportion" = round(cumsum(object$varProps),
+                        "Cumulative proportion" = round(cumsum(object$varProps),
                                                         5)
                         )
   }

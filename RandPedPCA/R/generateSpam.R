@@ -31,7 +31,12 @@ importLinv <- function(pth){
 #' @importFrom methods as
 #' @importFrom spam as.spam.dgCMatrix
 sparse2spam <- function(sprs){
-  dgC <- as(sprs, "dgCMatrix") # conversion to spam has to go through dgCMatrix
+  if(inherits(sprs, "dtCMatrix")){ # the format returned by pedigreeTools::getLInc
+    dgC <- as(sprs, "dgCMatrix") # conversion to spam has to go through dgCMatrix
+  } else {
+    dgC <- as(sprs, "CsparseMatrix")
+  }
+
   return(as.spam.dgCMatrix(dgC))
 }
 
