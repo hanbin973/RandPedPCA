@@ -5,7 +5,7 @@
 # test
 test_that("rppca on Linv", {
   expect_no_condition(
-    pc <- rppca(pedLinv)
+    pc <- rppca(pedLInv)
   )
 
   expect_warning(summary(pc))
@@ -28,7 +28,11 @@ test_that("rppca on pedigree", {
 
 
 test_that("rppca on Linv with totVar supplied", {
-  expect_no_condition(pc3 <- rppca(pedLinv, totVar = 3549.629))
+  ped <- pedigree(sire  = pedMeta$fid,
+                  dam   = pedMeta$mid,
+                  label = pedMeta$id)
+  tv <- sum(inbreeding(ped)+1)
+  expect_no_condition(pc3 <- rppca(pedLInv, totVar = tv))
   expect_no_condition(summary(pc3))
   expect_false(pc3$center)
   expect_false(pc3$scale)

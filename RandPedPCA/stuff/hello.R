@@ -23,8 +23,6 @@ summary(pc)
 randTraceHutchinson(linv, numVectors = 40000)
 
 
-
-
 # try  naive approach, gat a inv matrix
 ainv <- readMM("../datasets/pedAInv.mtx")
 ainv[1:10, 1:10]
@@ -217,6 +215,15 @@ image(ccc)
 i4 <- as.matrix(iris[,1:4])
 i4cent <- scale(i4, scale = F, center = T) # traits centered
 i4tcent <- scale(t(i4), scale = F, center = T) # inds centered
+
+
+crossprod(i4) / 149
+crossprod(i4cent) / 149 # same as cov(i4)
+
+cov(i4)
+cov
+apply(i4, 2, var)
+apply(i4cent, 2, var)
 # sds of the data
 sds <- apply(i4, 2, sd)
 # Sepal.Length  Sepal.Width Petal.Length  Petal.Width
@@ -229,8 +236,17 @@ vars <- apply(i4, 2, var)
 #    0.6856935    0.1899794    3.1162779    0.5810063
 sum(vars)
 # 4.572957
-pci <- prcomp(i4)
+
+pci <- prcomp(i4, center = T, scale. = F) # the default
+
 pciNN <- prcomp(i4, center = F, scale. = F)
+pciTT <- prcomp(i4, center = T, scale. = T)
+pciFT <- prcomp(i4, center = F, scale. = T)
+pciTF <- prcomp(i4, center = T, scale. = F)
+summary(pci)
+summary(pciNN)
+summary(pciTT)
+summary(pciFT)
 pci$center
 pci$scale
 pciNN$center
@@ -321,7 +337,7 @@ plot(ewt2$vectors[,1:2])
 # SVD
 isvd <- svd(i4cent)
 
-icovsvd <- svd(cwt2$cov)
+
 
 isvd$u
 isvd$v
@@ -336,9 +352,18 @@ isvd2 <- svd(cMat1)
 plot(isvd2$u[,1:2], col=iris$Species, main="SVD (u) of centered iris individual cov mat") # pattern wrong, identical to ED of individual cov mat
 plot(isvd2$v[,1:2])
 
-plot((icovsvd$u)[,1:2], col=iris$Species) # pattern wrong again
-plot((icovsvd$u %*% diag(icovsvd$d))[,1:2]) # just changes scale
-
+icov2svd <- svd(cwt2$cov)
+plot((icov2svd$u)[,1:2], col=iris$Species) # pattern wrong again
+plot((icov2svd$u %*% diag(icov2svd$d))[,1:2], col=iris$Species) # just changes scale
+dim(icov2svd$v)
+dim(icov2svd$u)
+plot((i4cent %*% t(icov2svd$u))[,1:2])
+plot(icov2svd$v[,1:2])
+# compare to PCA
+plot(pciNN$x[,1:2], col = iris$Species)
+plot(pciFT$x[,1:2], col = iris$Species)
+plot(pciTT$x[,1:2], col = iris$Species)
+plot(pciTF$x[,1:2], col = iris$Species)
 #ch <- chol(cMat1) # does not work
 chol(cwt2$cov)
 
@@ -637,7 +662,7 @@ summary(pcllt)$importance[2,1:10]
 pc2$varProps
 
 
-# PCA with wipedA# PCA with wide matrix ----------------------------------------------------
+dA# PCA with wide matrix ----------------------------------------------------
 
 prcompI4t <- prcomp(t(i4), center = F)
 plot(prcompI4t$x[,1:2])
@@ -682,4 +707,182 @@ for(ll in 1:nrow(pm)){
   }
 
 }
+
+
+
+# subsets -----------------------------------------------------------------
+
+myInds <- (pedMeta$population == "A") & (pedMeta$generation>0) & (pedMeta$generation < 10)
+myGens <- pedMeta$generation[(pedMeta$population == "A") & (pedMeta$generation>0) & (pedMeta$generation < 10)]
+myCols <- rainbow(9)[myGens]
+plot(1:9, col = rainbow(9)) # red -low -> purple - high
+sum(myInds)
+length(myInds)
+genoSub <- data$genoIBS[myInds,]
+dim(genoSub)
+dim(pedLInv)
+dim(pedMeta)
+lSub <- pedLInv[myInds, myInds]
+dim(lSub)
+class(lSub)
+subMeta <- pedMeta[(pedMeta$population == "A") &(pedMeta$generation>0) & (pedMeta$generation < 10),]
+subMeta$fid[subMeta$generation==1] <- 0
+subMeta$mid[subMeta$generation==1] <- 0
+pedSmall <- pedigree(sire = subMeta$fid,
+                     dam=subMeta$mid,
+                     label = subMeta$id)
+pcLSub2 <- rppca(sparse2spam(lSub))
+pcLSub <- rppca(pedSmall)
+pcGSub <- prcomp(genoSub, center = T, scale. = F)
+
+summary(pcLSub)
+summary(pcGSub)$importance[,1:8]
+
+plot(pcGSubC$x[,1:2])
+
+par(mfrow=c(2,2))
+plot(pcGSub$x[,1:2],
+     col=myCols,
+     type="n",
+     xlab="PC1 (genotypes) 10%",
+     ylab="PC2 (genotypes) 6.4%")
+grid()
+points(pcGSub$x[,1:2],
+       col=myCols)
+# legend("bottomright",
+#        pch=1,
+#        col=rainbow(9),
+#        legend=1:9,
+#        title="Generation",
+#        ncol = 3)
+plot(x=pcLSub$x[,2],
+     y=pcGSub$x[,2],
+     col=myCols,
+     type="n",
+     xlab="PC2 (pedigree) 3.7%",
+     ylab="PC2 (genotypes) 6.4%")
+grid()
+points(x=pcLSub$x[,2],
+       y=pcGSub$x[,2],
+       col=myCols)
+plot(pcGSub$x[,1],
+     pcLSub$x[,1],
+     col=myCols,
+     type="n",
+     xlab="PC1 (genotypes) 10%",
+     ylab="PC1 (pedigree) 26%")
+grid()
+points(pcGSub$x[,1],
+       pcLSub$x[,1],
+       col=myCols)
+plot(pcLSub$x[,2:1],
+     col=myCols,
+     type="n",
+     xlab="PC2 (pedigree) 3.7%",
+     ylab="PC1 (pedigree) 26%")
+grid()
+points(pcLSub$x[,2:1],
+       col=myCols,)
+
+par(mfrow=c(1,1))
+image(pcLSub$x[subMeta$generation==1,])
+image(pcLSub$x[subMeta$generation==2,])
+image(pcLSub$x[subMeta$generation==3,])
+image(pcLSub$x[subMeta$generation==4,])
+
+
+# 2 pop sim ---------------------------------------------------------------
+library(rsvd)
+ped2 <- pedigree(sire = pedMeta2$fid,
+                 dam = pedMeta2$mid,
+                 label = pedMeta2$id)
+pc <- rppca(pedLInv)
+pc2 <- rppca(ped2)
+summary(pc2)
+pc2G <- rpca(pedGeno2, center = T, scale = F, k=10)
+pc2GnoC <- rpca(pedGeno2, center = F, scale = F, k=10)
+summary(pc2G)
+summary(pc2GnoC)
+
+par(mfrow=c(2,2))
+plot(pc2G$x[,1:2],
+     type="n",
+     xlab="PC1 (genotypes) 51%",
+     ylab="PC2 (genotypes) 4.5%")
+grid()
+points(pc2G$x[,1:2], col=pedMeta2$population)
+
+plot(x=pc2$x[,2],
+     y=pc2G$x[,2],
+     type="n",
+     xlab="PC2 (pedigree) 22%",
+     ylab="PC2 (genotypes) 4.5%")
+grid()
+points(x=pc2$x[,2],
+       y=pc2G$x[,2],
+       col=pedMeta2$population)
+
+
+plot(x=pc2G$x[,1],
+     y=pc2$x[,1],
+     type="n",
+     ylab="PC1 (pedigree) 27%",
+     xlab="PC1 (genotypes) 51%")
+grid()
+points(x=pc2G$x[,1],
+       y=pc2$x[,1],
+       col=pedMeta2$population)
+
+
+
+
+plot(pc2$x[,2:1],
+     type="n",
+     xlab="PC2 (pedigree) 22%",
+     ylab="PC1 (pedigree) 27%")
+grid()
+points(pc2$x[,2:1], col= pedMeta2$population)
+
+
+
+# not centered
+par(mfrow=c(2,2))
+plot(pc2GnoC$x[,1:2],
+     type="n",
+     xlab="PC1 (genotypes) 51%",
+     ylab="PC2 (genotypes) 4.5%")
+grid()
+points(pc2GnoC$x[,1:2], col=pedMeta2$population)
+
+plot(x=pc2$x[,2],
+     y=pc2GnoC$x[,2],
+     type="n",
+     xlab="PC2 (pedigree) 22%",
+     ylab="PC2 (genotypes) 4.5%")
+grid()
+points(x=pc2$x[,2],
+       y=pc2GnoC$x[,2],
+       col=pedMeta2$population)
+
+
+plot(x=pc2GnoC$x[,1],
+     y=pc2$x[,1],
+     type="n",
+     ylab="PC1 (pedigree) 27%",
+     xlab="PC1 (genotypes) 51%")
+grid()
+points(x=pc2GnoC$x[,1],
+       y=pc2$x[,1],
+       col=pedMeta2$population)
+
+
+
+
+plot(pc2$x[,2:1],
+     type="n",
+     xlab="PC2 (pedigree) 22%",
+     ylab="PC1 (pedigree) 27%")
+grid()
+points(pc2$x[,2:1], col= pedMeta2$population)
+
 

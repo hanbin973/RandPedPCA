@@ -55,7 +55,7 @@ randSVD <- function(L, rank, depth, numVectors){
   C <- t(backsolve(t(L), Q))
   svdObject <- svd(C)
   U <- Q %*% svdObject$u
-  D <- svdObject$d #** 2 # make output match prcomp's
+  D <- svdObject$d ** 2
   V <- svdObject$v
   return(list(u=U[,1:rank], d=D[1:rank], v=V[1:rank,]))
 }
@@ -160,7 +160,7 @@ rppca.spam <- function(pdg,
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
 
-    stdv <- rsvd$d
+    stdv <- sqrt(rsvd$d)
     names(stdv) <- paste0("PC", 1:length(stdv))
 
     pc <- list(x= scores,

@@ -4,7 +4,7 @@
 #' A dataframe.
 #'
 #' @format ## `pedMeta`
-#' A 'data.frame' of 7100 individuals (rows) with 12 variables (cols):
+#' A 'data.frame' of 2650 individuals (rows) with 12 variables (cols):
 #' \describe{
 #'   \item{id}{Integer individual ID}
 #'   \item{population}{Population code. A, B or AB}
@@ -27,15 +27,28 @@
 
 #' Example pedigree L inverse matrix
 #'
-#' An L inverse matrix generated from an AlphaSimR simulation of 50 generations.
+#' An L inverse matrix generated from an AlphaSimR simulation of 20 generations.
 #' An original population splits into sub-populations A and B. After a number of
 #' generations, crossbreeding starts.
 #'
 #'
-#' @format ## `pedLinv`
-#' Matrix object of class 'spam' of dimension 7100x7100,
-#'     with 21040 (row-wise) nonzero elements.
-#'     Density of the matrix is 0.0417%.
+#' @format ## `pedLInv`
+#' Matrix object of class 'spam' of dimension 2650x2650,
+#'     with 7750 (row-wise) nonzero elements.
+#'     Density of the matrix is 0.11%.
 #'     Class 'spam' (32-bit)
 #' @source Simulation
-"pedLinv"
+"pedLInv"
+
+
+#' Example genotype data
+#'
+#' An genotype matrix (0/1/2) generated from an AlphaSimR simulation of 20 generations.
+#' An original population splits into sub-populations A and B. After a number of
+#' generations, crossbreeding starts.
+#'
+#'
+#' @format ## `pedGeno`
+#' Matrix of 2650 rows (inidividuals) and 11000 columns (SNPs)
+#' @source Simulation
+"pedGeno"

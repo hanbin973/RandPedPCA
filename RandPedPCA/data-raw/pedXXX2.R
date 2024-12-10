@@ -32,16 +32,10 @@ library(package = "pedigreeTools")
 # ---- SIMULATION - ONE OR TWO FOUNDER POPULATION ------------------------
 set.seed(987765543)
 # Simulate founder genomes - one common founder population
-#founderGenomes <- runMacs(nInd = 100, nChr = 10, segSites = 1100,
-#                          species = "GENERIC")
-founderGenomes <- quickHaplo(nInd = 100, nChr = 10, segSites = 1100)
-
 # Simulate founder genomes - two founder populations that have a common origin
-# founderGenomes2 <- runMacs(nInd = 100, nChr = 10, segSites = 1100, split = 100,
-#                            species = "GENERIC")
-
-# ... uncomment the line below and run the code to use the two-founder population
-# founderGenomes <- founderGenomes2
+founderGenomes2 <- runMacs(nInd = 100, nChr = 10, segSites = 1100, split = 100,
+                          species = "GENERIC")
+founderGenomes <- founderGenomes2
 
 # Initiate simulation parameters
 SP <- SimParam$new(founderPop = founderGenomes)
@@ -211,18 +205,18 @@ ped <- pedigree(sire = factor(data$pedigree$fid),
 # We really need only A and Linv, but saving other objects for pedagogy.
 
 # Relatedness - covariance (limited scalability)
-pedA <- getA(ped = ped)
+pedA2 <- getA(ped = ped)
 # ... factorisation
-pedL <- getL(ped = ped)
-pedT <- getT(ped = ped)
-pedD <- getD(ped = ped)
+pedL2 <- getL(ped = ped)
+pedT2 <- getT(ped = ped)
+pedD2 <- getD(ped = ped)
 
 # Relatedness - precision (very sparse so very scalable)
-pedAInv <- getAInv(ped = ped)
+pedAInv2 <- getAInv(ped = ped)
 # ... factorisation
-pedLInv <- sparse2spam(getLInv(ped = ped))
-pedTInv <- getTInv(ped = ped)
-pedDInv <- getDInv(ped = ped)
+pedLInv2 <- sparse2spam(getLInv(ped = ped))
+pedTInv2 <- getTInv(ped = ped)
+pedDInv2 <- getDInv(ped = ped)
 
 # ---- rIBD COVARIANCE ---------------------------------------------------
 
@@ -247,8 +241,8 @@ pedDInv <- getDInv(ped = ped)
 #write.csv(x = data$pedigree$population, file = "popLabel.csv", row.names = FALSE)
 #write.csv(x = data$pedigree, file = "pedMeta.csv", row.names = FALSE)
 
-pedMeta <- data$pedigree
-pedGeno <- data$genoIBS
-usethis::use_data(pedLInv, overwrite = TRUE)
-usethis::use_data(pedMeta, overwrite = TRUE)
-usethis::use_data(pedGeno, overwrite = TRUE)
+pedMeta2 <- data$pedigree
+pedGeno2 <- data$genoIBS
+usethis::use_data(pedLInv2, overwrite = TRUE)
+usethis::use_data(pedMeta2, overwrite = TRUE)
+usethis::use_data(pedGeno2, overwrite = TRUE)
