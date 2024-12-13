@@ -293,6 +293,13 @@ cMat1 / cwt2$cov
 cMat2 / cwt1$cov
 # the above a scaled by 1/n-1
 
+cwt1mat <- cwt1$cov
+diag(cwt1mat) <- diag(cwt1mat) + 1e-6
+
+cwt2mt <- cwt2$cov
+diag(cwt2mt) <- diag(cwt2mt) + 1e-6
+image(chol(cwt2$cov))
+image(chol(cwt2mt))
 
 image(cMat1)
 image(cwt2$cov)
