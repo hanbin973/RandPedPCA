@@ -136,7 +136,12 @@ randTraceHutchinson <- function(L, numVectors){
 #' @export rppca
 #' @rdname rppca
 #'
-#' @examples rppca(pedLInv)
+#' @examples pc <- rppca(pedLInv)
+#' ped <- pedigree(sire=pedMeta$fid,
+#'                 dam=pedMeta$mid,
+#'                 label=pedMeta$id
+#'                 )
+#' pc2 <- rppca(ped)
 #'
 rppca <- function(pdg, ...) UseMethod("rppca")
 
@@ -214,7 +219,7 @@ rppca.pedigree <- function(pdg,
     rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
-    stdv <- rsvd$d
+    stdv <- sqrt(rsvd$d)
     names(stdv) <- paste0("PC", 1:length(stdv))
     vp <- stdv^2/totVar
     names(vp) <- paste0("PC", 1:length(vp))

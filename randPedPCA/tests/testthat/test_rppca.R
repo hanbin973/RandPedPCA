@@ -26,6 +26,19 @@ test_that("rppca on pedigree", {
   expect_failure(expect_null(pc2$varProps))
 })
 
+test_that("Comparing STD values", {
+  expect_no_condition(
+    pc <- rppca(pedLInv)
+  )
+
+  ped <- pedigree(sire  = pedMeta$fid,
+                  dam   = pedMeta$mid,
+                  label = pedMeta$id)
+  expect_no_error(pc2 <- rppca(ped))
+  expect_true(all(pc$sdev[1:2] - pc2$sdev[1:2] < 1e-10))
+})
+
+
 
 test_that("rppca on Linv with totVar supplied", {
   ped <- pedigree(sire  = pedMeta$fid,
