@@ -63,6 +63,6 @@ Rotation is not returned by default as it is the transpose of the PC scores,
 which are returned in `x`. `scale` and `center` are set to `FALSE`.
 }
 \examples{
-rppca(pedLinv)
+rppca(pedLInv)
 
 }

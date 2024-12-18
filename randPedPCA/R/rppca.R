@@ -136,7 +136,7 @@ randTraceHutchinson <- function(L, numVectors){
 #' @export rppca
 #' @rdname rppca
 #'
-#' @examples rppca(pedLinv)
+#' @examples rppca(pedLInv)
 #'
 rppca <- function(pdg, ...) UseMethod("rppca")
 

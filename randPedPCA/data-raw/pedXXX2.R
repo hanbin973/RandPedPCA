@@ -245,4 +245,4 @@ pedMeta2 <- data$pedigree
 pedGeno2 <- data$genoIBS
 usethis::use_data(pedLInv2, overwrite = TRUE)
 usethis::use_data(pedMeta2, overwrite = TRUE)
-usethis::use_data(pedGeno2, overwrite = TRUE)
+#usethis::use_data(pedGeno2, overwrite = TRUE)
