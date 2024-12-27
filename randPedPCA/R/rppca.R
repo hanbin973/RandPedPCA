@@ -23,8 +23,10 @@ randRangeFinder <- function(L, rank, depth, numVectors){
   for (i in 1:depth){
     qrObject <- base::qr(Q)
     Q <- qr.Q(qrObject)
+    # Q <- apply(Q, 2, function(col) col - mean(col))
     Q <- spam::backsolve(t(L),Q)
     Q <- spam::forwardsolve(L,Q)
+    # Q <- apply(Q, 2, function(col) col - mean(col))
   }
   qrObject <- qr(Q)
   Q <- qr.Q(qrObject)
