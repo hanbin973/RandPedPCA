@@ -54,6 +54,7 @@ randSVD <- function(L, rank, depth, numVectors){
   # numVectors: usually rank + 5~10, must be larger than rank
   dim <- nrow(L)
   Q <- randRangeFinder(L, rank, depth, numVectors)
+  # Q <- apply(Q, 2, function(col) col - mean(col))
   C <- t(backsolve(t(L), Q))
   svdObject <- svd(C)
   U <- Q %*% svdObject$u
