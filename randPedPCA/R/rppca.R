@@ -8,6 +8,8 @@
 #' @param rank  `integer` how many principal components to return
 #' @param depth `integer` number of iterations for generating the range matrix
 #' @param numVectors `integer` > `rank` to specify the oversampling for the
+#' @param cent `logical` whether or not to (implicitly) centre the additive
+#' relationship matrix
 #'
 #' @return The range matrix for `randSVD`
 #' @export
@@ -15,7 +17,7 @@
 #' @importFrom spam backsolve
 #' @importFrom spam forwardsolve
 #' @importFrom stats rnorm
-randRangeFinder <- function(L, rank, depth, numVectors){
+randRangeFinder <- function(L, rank, depth, numVectors, cent=F){
   dim <- nrow(L)
   testVectors <- rnorm(n = dim * numVectors)
   testMatrix <- matrix(testVectors, nrow = dim, ncol = numVectors)
@@ -23,10 +25,10 @@ randRangeFinder <- function(L, rank, depth, numVectors){
   for (i in 1:depth){
     qrObject <- base::qr(Q)
     Q <- qr.Q(qrObject)
-    # Q <- apply(Q, 2, function(col) col - mean(col))
+    if(cent) Q <- apply(Q, 2, function(col) col - mean(col))
     Q <- spam::backsolve(t(L),Q)
     Q <- spam::forwardsolve(L,Q)
-    # Q <- apply(Q, 2, function(col) col - mean(col))
+    if(cent)  Q <- apply(Q, 2, function(col) col - mean(col))
   }
   qrObject <- qr(Q)
   Q <- qr.Q(qrObject)
@@ -42,19 +44,21 @@ randRangeFinder <- function(L, rank, depth, numVectors){
 #' @param rank  `integer` how many principal components to return
 #' @param depth `integer` number of iterations for generating the range matrix
 #' @param numVectors `integer` > `rank` to specify the oversampling for the
+#' @param cent `logical` whether or not to (implicitly) centre the additive
+#' relationship matrix
 #'
 #' @return A list of three: u (=U), d (=Sigma), and v (=W^T)
 #' @export
 #'
 #' @importFrom spam backsolve
-randSVD <- function(L, rank, depth, numVectors){
+randSVD <- function(L, rank, depth, numVectors, cent=F){
   # L: lower cholesky factor of animal matrix
   # rank: number of PCs
   # depth: power iteration, higher -> more accurate approximation, ~5 is usually sufficient
   # numVectors: usually rank + 5~10, must be larger than rank
   dim <- nrow(L)
-  Q <- randRangeFinder(L, rank, depth, numVectors)
-  # Q <- apply(Q, 2, function(col) col - mean(col))
+  Q <- randRangeFinder(L, rank, depth, numVectors, cent=cent)
+  if(cent) Q <- apply(Q, 2, function(col) col - mean(col))
   C <- t(backsolve(t(L), Q))
   svdObject <- svd(C)
   U <- Q %*% svdObject$u
@@ -113,6 +117,8 @@ randTraceHutchinson <- function(L, numVectors){
 #' range matrix
 #' @param totVar `scalar` (optional) the total variance, required for
 #' computation of variance proportions when using an L-inverse matrix a input
+#' @param center `logical` whether or not to (implicitly) centre the additive
+#' relationship matrix
 #' @param ... optional arguments passed to methods
 #'
 #' @details
@@ -131,7 +137,7 @@ randTraceHutchinson <- function(L, numVectors){
 #' * vProp, the estimated variance proportions accounted for by each PC.
 #'   Only returned if `totVar` is set.
 #' * scale, always `FALSE`
-#' * center, always `FALSE`
+#' * center, `logical` whether or not the implicit input matrix was centred
 #' * rotation, the right singular values of the (implicit) relationship matrix.
 #'   Only returned if `returnRotation == TRUE`
 #' * varProps, proportion of the total variance explained by each PC. Only
@@ -159,12 +165,13 @@ rppca.spam <- function(pdg,
                   depth=3,
                   numVectors=15,
                   totVar=NULL,
+                  center=F,
                   ...){
   #check L is the right kind of sparse matrix
   returnRotation=TRUE
   nn <- dim(pdg)[1]
   if(method=="randSVD"){
-    rsvd = randSVD(pdg, rank=rank, depth=depth, numVectors=numVectors)
+    rsvd = randSVD(pdg, rank=rank, depth=depth, numVectors=numVectors, cent=center)
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
 
@@ -173,7 +180,7 @@ rppca.spam <- function(pdg,
 
     pc <- list(x= scores,
                sdev=stdv / sqrt(max(1, nn-1)),
-               center=FALSE,
+               center=center,
                scale=FALSE
     )
 
@@ -203,6 +210,8 @@ rppca.pedigree <- function(pdg,
                           rank=10,
                           depth=3,
                           numVectors=15,
+                          totVar=NULL,
+                          center=F,
                           ...){
   #check L is the right kind of sparse matrix
   returnRotation=TRUE
@@ -213,25 +222,44 @@ rppca.pedigree <- function(pdg,
   # get number of inds
   nn <- dim(L)[1]
   # total var is sum of (inbreeding coefs + 1)
-  totVar <- sum(inbreeding(pdg) + 1)
+  if(center==F) {
+    if(!missing(totVar)){
+      warning("Using specified value of ", totVar, " a the total variance
+      instead of the value computed from the pedigree, which was ",
+              sum(inbreeding(pdg) + 1))
+  } else {
+    totVar <- sum(inbreeding(pdg) + 1)
+  }
+  }
+
+
   # get inbreeding+1 ->total variance
 
   # return var components by default
 
   if(method=="randSVD"){
-    rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors)
+    rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors, cent=center)
     scores = rsvd$u %*% diag(rsvd$d)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
     stdv <- sqrt(rsvd$d)
     names(stdv) <- paste0("PC", 1:length(stdv))
-    vp <- stdv^2/totVar
-    names(vp) <- paste0("PC", 1:length(vp))
-    pc <- list(x= scores,
-               sdev=stdv  / sqrt(max(1, nn-1)),
-               varProps=vp,
-               center=FALSE,
-               scale=FALSE
-    )
+    if(!is.null(totVar)){
+      vp <- stdv^2/totVar
+      names(vp) <- paste0("PC", 1:length(vp))
+      pc <- list(x= scores,
+                 sdev=stdv  / sqrt(max(1, nn-1)),
+                 varProps=vp,
+                 center=center,
+                 scale=FALSE
+      )
+    } else {
+      pc <- list(x= scores,
+                 sdev=stdv  / sqrt(max(1, nn-1)),
+                 center=center,
+                 scale=FALSE
+      )
+    }
+
 
     # return rotation only if requested
     if(returnRotation) pc$rotation <- t(pc$x)

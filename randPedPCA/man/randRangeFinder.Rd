@@ -4,7 +4,7 @@
 \alias{randRangeFinder}
 \title{Generat range matrix for SVD}
 \usage{
-randRangeFinder(L, rank, depth, numVectors)
+randRangeFinder(L, rank, depth, numVectors, cent = F)
 }
 \arguments{
 \item{L}{a pedigree's L inverse matrix in sparse 'spam' format}
@@ -14,6 +14,9 @@ randRangeFinder(L, rank, depth, numVectors)
 \item{depth}{`integer` number of iterations for generating the range matrix}
 
 \item{numVectors}{`integer` > `rank` to specify the oversampling for the}
+
+\item{cent}{`logical` whether or not to (implicitly) centre the additive
+relationship matrix}
 }
 \value{
 The range matrix for `randSVD`

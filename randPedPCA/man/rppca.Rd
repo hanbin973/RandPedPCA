@@ -15,10 +15,20 @@ rppca(pdg, ...)
   depth = 3,
   numVectors = 15,
   totVar = NULL,
+  center = F,
   ...
 )
 
-\method{rppca}{pedigree}(pdg, method = "randSVD", rank = 10, depth = 3, numVectors = 15, ...)
+\method{rppca}{pedigree}(
+  pdg,
+  method = "randSVD",
+  rank = 10,
+  depth = 3,
+  numVectors = 15,
+  totVar = NULL,
+  center = F,
+  ...
+)
 }
 \arguments{
 \item{pdg}{A representation of a pedigree, see Details.}
@@ -36,6 +46,9 @@ range matrix}
 
 \item{totVar}{`scalar` (optional) the total variance, required for
 computation of variance proportions when using an L-inverse matrix a input}
+
+\item{center}{`logical` whether or not to (implicitly) centre the additive
+relationship matrix}
 }
 \value{
 A `list` containing:
@@ -48,7 +61,7 @@ A `list` containing:
 * vProp, the estimated variance proportions accounted for by each PC.
   Only returned if `totVar` is set.
 * scale, always `FALSE`
-* center, always `FALSE`
+* center, `logical` whether or not the implicit input matrix was centred
 * rotation, the right singular values of the (implicit) relationship matrix.
   Only returned if `returnRotation == TRUE`
 * varProps, proportion of the total variance explained by each PC. Only
@@ -63,6 +76,11 @@ Rotation is not returned by default as it is the transpose of the PC scores,
 which are returned in `x`. `scale` and `center` are set to `FALSE`.
 }
 \examples{
-rppca(pedLInv)
+pc <- rppca(pedLInv)
+ped <- pedigree(sire=pedMeta$fid,
+                dam=pedMeta$mid,
+                label=pedMeta$id
+                )
+pc2 <- rppca(ped)
 
 }

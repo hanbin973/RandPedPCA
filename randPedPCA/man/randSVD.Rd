@@ -4,7 +4,7 @@
 \alias{randSVD}
 \title{Singular value decomposition in sparse triangular matrix}
 \usage{
-randSVD(L, rank, depth, numVectors)
+randSVD(L, rank, depth, numVectors, cent = F)
 }
 \arguments{
 \item{L}{a pedigree's L inverse matrix in sparse 'spam' format}
@@ -14,6 +14,9 @@ randSVD(L, rank, depth, numVectors)
 \item{depth}{`integer` number of iterations for generating the range matrix}
 
 \item{numVectors}{`integer` > `rank` to specify the oversampling for the}
+
+\item{cent}{`logical` whether or not to (implicitly) centre the additive
+relationship matrix}
 }
 \value{
 A list of three: u (=U), d (=Sigma), and v (=W^T)

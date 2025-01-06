@@ -1,7 +1,7 @@
 Package: randPedPCA
 Type: Package
 Title: Fast PCA for large pedigrees
-Version: 0.9.0
+Version: 0.9.1
 Authors@R: c(
     person("Hanbin", "Lee", email = "hblee@umich.edu", role = "aut"),
     person("Hannes", "Becher", email = "h.becher@ed.ac.uk", role = "cre"),
@@ -21,6 +21,9 @@ Depends:
     pedigreeTools,
     R (>= 3.5)
 Suggests:
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3
+VignetteBuilder: knitr
