@@ -168,54 +168,54 @@ cython_debug/
 ###################################################
 
 # History files
-RandPedPCA/.Rhistory
-RandPedPCA/.Rapp.history
+randPedPCA/.Rhistory
+randPedPCA/.Rapp.history
 
 # Session Data files
-RandPedPCA/.RData
-RandPedPCA/.RDataTmp
+randPedPCA/.RData
+randPedPCA/.RDataTmp
 
 # User-specific files
-RandPedPCA/.Ruserdata
+randPedPCA/.Ruserdata
 
 # Example code in package build process
-RandPedPCA/*-Ex.R
+randPedPCA/*-Ex.R
 
 # Output files from R CMD build
 *.tar.gz
 
 # Output files from R CMD check
-RandPedPCA/*.Rcheck/
+randPedPCA/*.Rcheck/
 
 # RStudio files
-RandPedPCA/.Rproj.user/
+randPedPCA/.Rproj.user/
 
 # produced vignettes
-RandPedPCA/vignettes/*.html
-RandPedPCA/vignettes/*.pdf
+randPedPCA/vignettes/*.html
+randPedPCA/vignettes/*.pdf
 
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
-RandPedPCA/.httr-oauth
+randPedPCA/.httr-oauth
 
 # knitr and R markdown default cache directories
-RandPedPCA/*_cache/
-RandPedPCA/cache/
+randPedPCA/*_cache/
+randPedPCA/cache/
 
 # Temporary files created by R markdown
-RandPedPCA/*.utf8.md
-RandPedPCA/*.knit.md
+randPedPCA/*.utf8.md
+randPedPCA/*.knit.md
 
 # R Environment Variables
-RandPedPCA/.Renviron
+randPedPCA/.Renviron
 
 # pkgdown site
-RandPedPCA/docs/
+randPedPCA/docs/
 
 # translation temp files
-RandPedPCA/po/*~
+randPedPCA/po/*~
 
 # RStudio Connect folder
-RandPedPCA/rsconnect/
+randPedPCA/rsconnect/
 
-RandPedPCA.Rcheck/*
+randPedPCA.Rcheck/*
 
