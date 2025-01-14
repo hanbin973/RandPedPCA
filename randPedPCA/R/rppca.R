@@ -224,7 +224,7 @@ rppca.pedigree <- function(pdg,
   # total var is sum of (inbreeding coefs + 1)
   if(center==F) {
     if(!missing(totVar)){
-      warning("Using specified value of ", totVar, " a the total variance
+      warning("Using specified value of ", totVar, " for the total variance
       instead of the value computed from the pedigree, which was ",
               sum(inbreeding(pdg) + 1))
   } else {

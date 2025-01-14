@@ -24,10 +24,10 @@ in the columns of a matrix. Because pedigrees can be represented as matrices,
 they can, in principle, be subjected to PCA.
 
 When thinking about PCA,
-one usually begins with a data matrix, such as the iris dataset, whose rows represent
-individuals or observations and whose columns contain traits, features, or markers. However, when
+one usually begins with a data matrix, such as the iris dataset, where rows represent
+individuals (or observations) and columns contain traits (or features or markers). However, when
 dealing with a pedigree-derived matrix, there is no data matrix of this kind. For
-instance, a pedigree's additive relationship matrix **A** is a covariance matrix.
+instance, a pedigree's additive relationship matrix $A$ is a covariance matrix.
 Fortunately, PCA can also be achieved by starting from a covariance matrix. That is what
 the randPedPCA package does.
 
@@ -49,7 +49,7 @@ plot(pc01$x[,1:2], col = pedMeta$population)
 
 
 ## Matrix input
-Instead of starting from a pedigree, we can also use the pedigree's L inverse matrix
+Instead of starting from a pedigree, we can also use the pedigree's $L^{-1}$ matrix
 as the input to `rppca`. This matrix can be generated using the `getLInv` function
 from **`pedigreeTools`**. Note that `rppca` expects a sparse matrix
 in `spam` format. This is why we wrap `sparse2spam` around `getLInv`:
@@ -59,7 +59,7 @@ pc02 <- rppca(li, center = T)
 plot(pc02$x[,1:2], col = pedMeta$population)
 ```
 
-For simplicity, we decided to ship this L inverse matrix as an example dataset.
+For simplicity, we decided to ship this $L^{-1}$ matrix as an example dataset.
 The PCA result is identical when using this object `pedLinv`:
 ```{r}
 pc03 <- rppca(pedLInv, center = T)
@@ -78,13 +78,13 @@ R users may be used to this behaviour from the built-in functions `prcomp` and
 `princomp`.
 
 The reason that the variance proportions and cumulative sums are not shown by default
-is that these numbers are costly to estimate from a large L inverse matrix.
+is that these numbers are costly to estimate from a large $L^{-1}$ matrix.
 If the total variance is known, it can be specified when running `rppca` using
 the argument `totVar`.
 
 ### Examples
-The summary of a PCA generated from an L inverse matrix by default only shows
-the standard deviation accounted for by each PC. I also throws a warning saying
+The summary of a PCA generated from an $L^{-1}$ matrix by default only shows
+the standard deviation accounted for by each PC. It also throws a warning saying
 that there is no information about the total variance:
 ```{r}
 summary(pc02)
@@ -105,7 +105,7 @@ pc05 <- rppca(pedLInv, center=F, totVar=3521.534)
 summary(pc05)
 ```
 
-This can also be done when using pedigree input but with centring:
+This can also be done when using pedigree input but with centring. Note that the total variance of the centred matrix will usually differ from that of the original one:
 ```{r}
 pc06 <- rppca(ped, center=T, totVar=2694.038)
 summary(pc06)
@@ -125,10 +125,10 @@ Users will mainly want to analyse their own empirical or simulated datasets. Thi
 should be straightforward if the data are in pedigree format. In this case, `rppca`
 can be called directly in such an object as demonstrated above. 
 
-If the user has an L inverse matrix, this needs to be converted into 
+If the user has an $L^{-1}$ matrix, this needs to be converted into 
 a `spam` object, a specific sparse matrix format. We provide a wrapper
 called `importLinv` for reading
-matrices in Matrix Market format from disk an converting these into `spam` format.
-If a sparse L inverse matrix is already available in in the workspace, `sparse2spam`
+matrices in Matrix Market format from disk and converting these into `spam` format.
+If a sparse $L^{-1}$ matrix is already available in in the workspace, `sparse2spam`
 should work to convert it to `spam` format. Let us know if this does not work for
 you (and please share a reproducible example)!
