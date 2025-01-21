@@ -134,9 +134,15 @@ class(dogli)
 dogliEst <- sapply(1:100, function(x) hutchinsonLi(dogli, 10))
 dogliEstPP <- sapply(1:100, function(x) hutchplusplusLi(dogli, 10))
 
-hist(dogliEst)
-hist(dogliEstPP, add=T, col=2)
 
+hist(dogliEstPP, main="Trace of A (1.3M Labrador Retrievers)\n100 replicate estimates",
+     col="#FF000040", breaks=seq(1350000, 1650000, by=10000))
+hist(dogliEst, col="#40404040", breaks=seq(1350000, 1650000, by=10000),
+     add=T)
+legend("topright",
+       fill=c("#40404040","#FF000040"),
+       legend=c("Hutchinson", "Hutch++")
+       )
 # Checking types ----------------------------------------------------------
 
 S <- sketch_dist(dim(pedLInv)[1], 100)
