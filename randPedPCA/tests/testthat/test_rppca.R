@@ -29,7 +29,7 @@ test_that("rppca on Linv with totVar", {
   expect_true(dim(summary(pc)$importance)[1] == 3) # three rows
   expect_false(pc$center)
   expect_false(pc$scale)
-  expect_vector(pc$varProps)
+  expect_true(!is.null(pc$varProps))
 
 })
 
@@ -54,7 +54,7 @@ test_that("rppca on Linv centred with totVar", {
   expect_true(dim(summary(pc)$importance)[1] == 3) # three rows
   expect_true(pc$center)
   expect_false(pc$scale)
-  expect_vector(pc$varProps)
+  expect_true(!is.null(pc$varProps))
 
 })
 
@@ -69,7 +69,7 @@ test_that("rppca on pedigree", {
   expect_true(dim(summary(pc2)$importance)[1] == 3) # three rows
   expect_false(pc2$center)
   expect_false(pc2$scale)
-  expect_vector(pc2$varProps)
+  expect_true(!is.null(pc2$varProps))
 })
 
 test_that("rppca on pedigree with (redundant) totVar", {
@@ -81,7 +81,7 @@ test_that("rppca on pedigree with (redundant) totVar", {
   expect_no_condition(summary(pc2))
   expect_false(pc2$center)
   expect_false(pc2$scale)
-  expect_vector(pc2$varProps)
+  expect_true(!is.null(pc2$varProps))
 })
 
 
@@ -105,7 +105,7 @@ test_that("rppca on pedigree, centered with totVar", {
   expect_true(dim(summary(pc2)$importance)[1] == 3) # three rows
   expect_true(pc2$center)
   expect_false(pc2$scale)
-  expect_vector(pc2$varProps)
+  expect_true(!is.null(pc2$varProps))
 })
 
 

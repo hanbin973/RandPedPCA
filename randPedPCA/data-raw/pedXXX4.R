@@ -182,7 +182,7 @@ pedD <- getD(ped = ped)
 # Relatedness - precision (very sparse so very scalable)
 pedAInv <- getAInv(ped = ped)
 # ... factorisation
-pedLInv4 <- getLInv(ped = ped)
+pedLInv4 <- sparse2spam(getLInv(ped = ped))
 pedTInv <- getTInv(ped = ped)
 pedDInv <- getDInv(ped = ped)
 

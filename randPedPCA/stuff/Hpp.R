@@ -14,7 +14,7 @@ show(li)
 # returns the value of A * G (but taking L^-1 as input)
 oraculum <- function(Li, G){
   Y <- spam::backsolve(t(Li), G)
-  spam::forwardsolve(Li, Y)
+  return(spam::forwardsolve(Li, Y))
 }
 
 
@@ -77,29 +77,40 @@ hutchinsonLi <- function(Li,
   trace_est <- sum(diag(t(G) %*% oraculum(Li, G))) / num_queries
   return(trace_est)
 }
+
+
 hutch_dist  = function(m, n) 2*matrix(sample(1:2, size = m*n, replace = TRUE, prob = c(0.5, 0.5)), nrow = m, ncol = n) - 3
 sketch_dist = function(m, n) 2*matrix(sample(1:2, size = m*n, replace = TRUE, prob = c(0.5, 0.5)), nrow = m, ncol = n) - 3
+
 hutchplusplusLi <- function(Li,
                             num_queries,
-                            sketch_frac = 2/3){
+                            sketch_frac = 2/3,
+                            center=F){
   dimension <- dim(Li)[1]
-  print("Dim done.")
+  #print("Dim done.")
   S_num_queries <- round(num_queries * sketch_frac / 2)
 
   Hutch_num_queries <- num_queries - S_num_queries
-  print("Num queries done.")
+  #print("Num queries done.")
   S <- sketch_dist(dimension, S_num_queries)
-  print("S done.")
+  #print("S done.")
   Q <- qr.Q(Matrix::qr(oraculum(Li, S), 0))
-  print(class(Q))
-  print(dim(Q))
-  print("Q done.")
+  if(center) Q <- apply(Q, 2, function(x) x - mean(x))
+  #print(class(Q))
+  #print(dim(Q))
+  #print("Q done.")
   G <- hutch_dist(dimension, Hutch_num_queries)
-  print("G done.")
-  print(dim(G))
+  #print("G done.")
+  #print(dim(G))
   G <- G - Q %*% (t(Q) %*% G)
-  print("G done 2.")
-  trace_est <- sum(diag(t(Q) %*% oraculum(Li, Q))) + sum(diag(t(G) %*% oraculum(Li, G))) / Hutch_num_queries
+  #print("G done 2.")
+  if(center){
+    oLiQc <- apply(oraculum(Li, Q), 2, function(x) x - mean(x))
+    oLiGc <- apply(oraculum(Li, G), 2, function(x) x - mean(x))
+    trace_est <- sum(diag(t(Q) %*% oLiQc)) + sum(diag(t(G) %*% oLiGc)) / Hutch_num_queries
+  } else {
+    trace_est <- sum(diag(t(Q) %*% oraculum(Li, Q))) + sum(diag(t(G) %*% oraculum(Li, G))) / Hutch_num_queries
+  }
   return(trace_est)
 }
 class(dogli)
@@ -110,8 +121,12 @@ Sys.time() - t0
 
 t0 <- Sys.time()
 hutchplusplusLi(pedLInv, 100)
+hutchplusplusLi(pedLInv, 100, center = T)
 Sys.time() - t0
 traceback()
+
+
+
 
 
 
@@ -163,3 +178,57 @@ B <- matrix(1:9, nrow=1)
 Bt <- t(B)
 B %*% Bt
 Bt %*% B
+
+
+# Compare centred hpp implementation to true val --------------------------
+
+
+ped <- pedigree(sire=pedMeta$fid,
+                dam=pedMeta$mid,
+                label=pedMeta$id)
+
+ll <- getL(ped)
+llc <- apply(ll, 1, function(x) x - mean(x)) # need to center rows (as this is the transpose of L/upper triangle)
+image(llc)
+image(ll)
+
+a <- t(ll) %*% ll
+A <- getA(ped)
+sum(diag(A))
+sum(diag(a))
+
+ac <- llc %*% t(llc)
+act <- t(llc) %*% llc
+image(ac)
+image(act)
+image(llc)
+sum(diag(act))
+ped1exp <- sum(diag(ac))
+
+ped1centEst <- sapply(1:10000, function(x) hutchplusplusLi(pedLInv, 10, center=T))
+
+hist(ped1centEst)
+summary(lm(ped1centEst ~ 1))
+abline(v=sum(diag(ac)))
+t0 <- Sys.time()
+dogliEst <- sapply(1:100, function(x) hutchplusplusLi(dogli, 10, center=F))
+tEst <- Sys.time() - t0
+
+t0 <- Sys.time()
+dogliEstC <- sapply(1:100, function(x) hutchplusplusLi(dogli, 10, center=T))
+tEstC <- Sys.time() - t0
+str(tEstC)
+hist(dogliEst)
+hist(dogliEstC)
+
+
+?qr
+
+
+
+# Testing sweep -------------------------------------------------------------------
+
+dd <- matrix(1:12, nrow=3)
+sweep(dd, 2, mean) # does not work, vector required, not function!
+
+
