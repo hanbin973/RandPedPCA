@@ -122,7 +122,27 @@ test_that("Comparing STD values between rppca on pedigree and L^-1 input", {
 })
 
 
+# variance estimates
 
+test_that("Comparing Hutch++ estimate to inbreeding-based vals", {
+  ped <- pedigree(sire  = pedMeta$fid,
+                  dam   = pedMeta$mid,
+                  label = pedMeta$id)
+  tv <- sum(inbreeding(ped) + 1)
+  expect_true(abs(log10(tv/hutchpp(pedLInv, num_queries=100))) < 0.02)
+})
+
+
+test_that("Comparing Hutch++ estimate to inbreeding-based vals (with centring)", {
+  ped <- pedigree(sire  = pedMeta$fid,
+                  dam   = pedMeta$mid,
+                  label = pedMeta$id)
+  ll <- getL(ped)
+  llc <- apply(ll, 1, function(x) x - mean(x))
+  a <- llc %*% t(llc)
+  tv <- sum(diag(a))
+  expect_true(abs(log10(tv/hutchpp(pedLInv, num_queries=100, center=T))) < 0.02)
+})
 
 
 
