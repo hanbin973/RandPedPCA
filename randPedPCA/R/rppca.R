@@ -62,7 +62,7 @@ randSVD <- function(L, rank, depth, numVectors, cent=F){
   C <- t(backsolve(t(L), Q))
   svdObject <- svd(C)
   U <- Q %*% svdObject$u
-  D <- svdObject$d ** 2
+  D <- svdObject$d
   V <- svdObject$v
   return(list(u=U[,1:rank], d=D[1:rank], v=V[1:rank,]))
 }
@@ -172,10 +172,10 @@ rppca.spam <- function(pdg,
   nn <- dim(pdg)[1]
   if(method=="randSVD"){
     rsvd = randSVD(pdg, rank=rank, depth=depth, numVectors=numVectors, cent=center)
-    scores = rsvd$u %*% diag(rsvd$d)
+    scores = rsvd$u %*% diag(rsvd$d^2)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
 
-    stdv <- sqrt(rsvd$d)
+    stdv <- rsvd$d
     names(stdv) <- paste0("PC", 1:length(stdv))
 
     pc <- list(x= scores,
@@ -239,9 +239,9 @@ rppca.pedigree <- function(pdg,
 
   if(method=="randSVD"){
     rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors, cent=center)
-    scores = rsvd$u %*% diag(rsvd$d)
+    scores = rsvd$u %*% diag(rsvd$d^2)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
-    stdv <- sqrt(rsvd$d)
+    stdv <- rsvd$d
     names(stdv) <- paste0("PC", 1:length(stdv))
     if(!is.null(totVar)){
       vp <- stdv^2/totVar
