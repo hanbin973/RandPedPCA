@@ -1,0 +1,152 @@
+
+#' Metadata associated with the example pedigree
+#'
+#' A dataframe.
+#'
+#' @format ## `pedMeta`
+#' A 'data.frame' of 2650 individuals (rows) with 12 variables (cols):
+#' \describe{
+#'   \item{id}{Integer individual ID}
+#'   \item{population}{Population code. A, B or AB}
+#'   \item{generation}{Generation of the individual}
+#'   \item{mid}{dam ID}
+#'   \item{fid}{sire ID}
+#'   \item{gv1}{genetic value}
+#'   \item{pv1}{phenotypic value}
+#'   \item{gv2}{genetic value}
+#'   \item{pv2}{phenotypic value}
+#'   \item{gv}{genetic value}
+#'   \item{pv}{phenotypic value}
+#'   \item{generationPlotShift}{for plotting}
+#' }
+#' @source Simulation
+"pedMeta"
+
+
+
+
+#' Example pedigree L inverse matrix
+#'
+#' An L inverse matrix generated from an AlphaSimR simulation of 20 generations.
+#' An original population splits into sub-populations A and B. After a number of
+#' generations, crossbreeding starts.
+#'
+#'
+#' @format ## `pedLInv`
+#' Matrix object of class 'spam' of dimension 2650x2650,
+#'     with 7750 (row-wise) nonzero elements.
+#'     Density of the matrix is 0.11%.
+#'     Class 'spam' (32-bit)
+#' @source Simulation
+"pedLInv"
+
+# removed to reduce disk footprint
+#' #' Example genotype data
+#' #'
+#' #' An genotype matrix (0/1/2) generated from an AlphaSimR simulation of 20 generations.
+#' #' An original population splits into sub-populations A and B. After a number of
+#' #' generations, crossbreeding starts.
+#' #'
+#' #'
+#' #' @format ## `pedGeno`
+#' #' Matrix of 2650 rows (inidividuals) and 11000 columns (SNPs)
+#' #' @source Simulation
+#' "pedGeno"
+
+
+
+#' Metadata associated with the 2nd example pedigree
+#'
+#' A dataframe.
+#'
+#' @format ## `pedMeta2`
+#' A 'data.frame' of 2650 individuals (rows) with 12 variables (cols):
+#' \describe{
+#'   \item{id}{Integer individual ID}
+#'   \item{population}{Population code. A, B or AB}
+#'   \item{generation}{Generation of the individual}
+#'   \item{mid}{dam ID}
+#'   \item{fid}{sire ID}
+#'   \item{gv1}{genetic value}
+#'   \item{pv1}{phenotypic value}
+#'   \item{gv2}{genetic value}
+#'   \item{pv2}{phenotypic value}
+#'   \item{gv}{genetic value}
+#'   \item{pv}{phenotypic value}
+#'   \item{generationPlotShift}{for plotting}
+#' }
+#' @source Simulation
+"pedMeta2"
+
+
+
+
+#' Example pedigree L inverse matrix
+#'
+#' An L inverse matrix generated from an AlphaSimR simulation of 20 generations.
+#' Two diverged populations A and B. After a number of
+#' generations, crossbreeding starts.
+#'
+#'
+#' @format ## `pedLInv2`
+#' Matrix object of class 'spam' of dimension 2650x2650,
+#'     with 7750 (row-wise) nonzero elements.
+#'     Density of the matrix is 0.11%.
+#'     Class 'spam' (32-bit)
+#' @source Simulation
+"pedLInv2"
+
+# removed to reduce disk footprint
+#' #' Example genotype data 2
+#' #'
+#' #' An genotype matrix (0/1/2) generated from an AlphaSimR simulation of 20 generations.
+#' #' Two diverged populations A and B. After a number of
+#' #' generations, crossbreeding starts.
+#' #'
+#' #'
+#' #' @format ## `pedGeno2`
+#' #' Matrix of 2650 rows (inidividuals) and 11000 columns (SNPs)
+#' #' @source Simulation
+#' "pedGeno2"
+
+
+
+
+
+#' Metadata associated with the 2nd example pedigree
+#'
+#' A dataframe.
+#'
+#' @format ## `pedMeta4`
+#' A 'data.frame' of 4200 individuals (rows) with 9 variables (cols):
+#' \describe{
+#'   \item{id}{Integer individual ID}
+#'   \item{population}{Population code. A, B, C, D, or ABCD}
+#'   \item{generation}{Generation of the individual}
+#'   \item{mid}{dam ID}
+#'   \item{fid}{sire ID}
+#'   \item{gv1}{genetic value}
+#'   \item{pv1}{phenotypic value}
+#'   \item{gv2}{genetic value}
+#'   \item{pv2}{phenotypic value}
+#' }
+#' @source Simulation
+"pedMeta4"
+
+
+
+
+#' Example pedigree L inverse matrix
+#'
+#' An L inverse matrix generated from an AlphaSimR simulation of 20 generations.
+#' One population, ABCD, is split into four, A, B, C, D.
+#'
+#'
+#'
+#' @format ## `pedLInv4`
+#' Matrix object of class 'spam' of dimension 4200x4200,
+#'     with 12200 (row-wise) nonzero elements.
+#'     Density of the matrix is 0.0692%.
+#'     Class 'spam' (32-bit)
+#' @source Simulation
+"pedLInv4"

@@ -28,7 +28,7 @@ library(package = "dplyr")
 library(package = "pedigreeTools")
 
 # ---- SIMULATION - ONE OR TWO FOUNDER POPULATION ------------------------
-
+set.seed(987765543)
 # Simulate founder genomes - one common founder population
 founderGenomes <- runMacs(nInd = 100, nChr = 10, segSites = 1100,
                           species = "GENERIC")
@@ -225,8 +225,9 @@ pedDInv <- getDInv(ped = ped)
 # For comparison and pedagogy.
 
 # Build covariance matrix (this is slow!)
-genIBDG <- SIMplyBee::calcBeeGRMIbd(x = data$haploIBD)
-str(genIBDG)
+
+#genIBDG <- SIMplyBee::calcBeeGRMIbd(x = data$haploIBD)
+#str(genIBDG)
 
 # ---- SAVE DATA ---------------------------------------------------------
 
@@ -236,3 +237,4 @@ Matrix::writeMM(obj = pedA,    file = "pedA.mtx")
 Matrix::writeMM(obj = pedAInv, file = "pedAInv.mtx")
 Matrix::writeMM(obj = pedLInv, file = "pedLInv.mtx")
 write.csv(x = data$pedigree$population, file = "popLabel.csv", row.names = FALSE)
+write.csv(x = data$pedigree, file = "pedMeta.csv", row.names = FALSE)
