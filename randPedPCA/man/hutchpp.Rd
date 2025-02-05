@@ -24,7 +24,7 @@ hutchpp(
 \item{oraculum}{The oracle function to use}
 }
 \value{
-Numeric. An estimate of A's trace.
+An estimate of A's trace - numeric
 }
 \description{
 Hutch++ trace estimation
@@ -33,11 +33,18 @@ Hutch++ trace estimation
 The Hutch++ algorithm (Meyer et al. 2021, https://doi.org/10.48550/arXiv.2010.09649)
 estimates the trace of a matrix A by evaluating matrix
 vector products of A and (sub-gaussian) random vectors. This is used on a
-matrix B which is relate to A through some function. The oracle function has
-to be chosen so that oracle(B, G) returns the product A %*% G.
+matrix B which is related to A through some function. The oracle function has
+to be chosen so that oracle(B, G) returns the product A %*% G. By default,
+the oracle function is set to work on a pedigree's L inverse matrix. But this
+inplementation is genral and should work - given a custom oracle function -
+on other input too.
 
 In the context of pedigree PCA, this is used to estimate the trace of an
 (implicitly) centred additive relationship matrix.
+
+There logical paramter center allows for a pedigree's L matrix to be
+(implicitly) centred. This is important because centring changes the total
+variance of the data and thus the trace of A.
 }
 \examples{
 hutchpp(pedLInv)
