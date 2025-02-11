@@ -18,6 +18,13 @@
 #'
 #'
 #' @export
+#' @examples
+#' pc <- rppca(pedLInv)
+#' plot3D(pc)
+#'
+#' ped <- pedigree(sire=pedMeta$fid, dam=pedMeta$mid, label=pedMeta$id)
+#' pc2 <- rppca(ped)
+#' plot3D(pc2)
 plot3D <- function(x, dims=c(1,2,3), ...) {
   if (!requireNamespace("rgl", quietly = TRUE)) {
     stop(
@@ -35,7 +42,7 @@ plot3D <- function(x, dims=c(1,2,3), ...) {
         ...
       )
     } else {
-      plot3d(
+      rgl::plot3d(
         x$x[,dims],
         ...
       )
