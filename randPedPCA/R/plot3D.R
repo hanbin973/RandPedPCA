@@ -9,6 +9,9 @@
 #' @param x, an rppca object
 #'
 #' @param dims, vector of length 3 - indices of the PCs to plot
+#' @param xlab (optional) x axis label
+#' @param ylab (optional) yaxis label
+#' @param zlab (optional) xz axis label
 #' @param ... additional arguments passed to rgl::plot3d
 #'
 #' @details
@@ -25,25 +28,31 @@
 #' ped <- pedigree(sire=pedMeta$fid, dam=pedMeta$mid, label=pedMeta$id)
 #' pc2 <- rppca(ped)
 #' plot3D(pc2)
-plot3D <- function(x, dims=c(1,2,3), ...) {
+plot3D <- function(x, dims=c(1,2,3), xlab=NULL, ylab=NULL, zlab=NULL, ...) {
   if (!requireNamespace("rgl", quietly = TRUE)) {
     stop(
       "Package \"rgl\" must be installed to use this function.",
       call. = FALSE
     )
   } else {
-    ss <- summary(x)$importance
+    # Summary throws a warning if there are no variance proportions
+    # We'll suppress this as we handle both cases, with and without variance components.
+    ss <- suppressWarnings(summary(x)$importance) # get variance components
+
     if(dim(ss)[1] == 3){
       rgl::plot3d(
         x$x[,dims],
-        xlab=paste0("PC", dims[1], " (", signif(100*ss[2,dims[1]], 3), "%)"),
-        ylab=paste0("PC", dims[2], " (", signif(100*ss[2,dims[2]], 3), "%)"),
-        zlab=paste0("PC", dims[3], " (", signif(100*ss[2,dims[3]], 3), "%)"),
+        xlab=ifelse(is.null(xlab), paste0("PC", dims[1], " (", signif(100*ss[2,dims[1]], 3), "%)"), xlab),
+        ylab=ifelse(is.null(ylab), paste0("PC", dims[2], " (", signif(100*ss[2,dims[2]], 3), "%)"), ylab),
+        zlab=ifelse(is.null(zlab), paste0("PC", dims[3], " (", signif(100*ss[2,dims[3]], 3), "%)"), zlab),
         ...
       )
     } else {
       rgl::plot3d(
         x$x[,dims],
+        xlab=ifelse(is.null(xlab), paste0("PC", dims[1]), xlab),
+        ylab=ifelse(is.null(ylab), paste0("PC", dims[2]), ylab),
+        zlab=ifelse(is.null(zlab), paste0("PC", dims[3]), zlab),
         ...
       )
     }
