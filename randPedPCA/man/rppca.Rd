@@ -6,10 +6,10 @@
 \alias{rppca.pedigree}
 \title{Fast pedigree PCA using sparse matrices and randomised linear algebra}
 \usage{
-rppca(pdg, ...)
+rppca(X, ...)
 
 \method{rppca}{spam}(
-  pdg,
+  X,
   method = "randSVD",
   rank = 10,
   depth = 3,
@@ -20,7 +20,7 @@ rppca(pdg, ...)
 )
 
 \method{rppca}{pedigree}(
-  pdg,
+  X,
   method = "randSVD",
   rank = 10,
   depth = 3,
@@ -31,7 +31,7 @@ rppca(pdg, ...)
 )
 }
 \arguments{
-\item{pdg}{A representation of a pedigree, see Details.}
+\item{X}{A representation of a pedigree, see Details.}
 
 \item{...}{optional arguments passed to methods}
 

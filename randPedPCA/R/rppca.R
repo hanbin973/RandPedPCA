@@ -67,51 +67,10 @@ randSVD <- function(L, rank, depth, numVectors, cent=F){
   return(list(u=U[,1:rank], d=D[1:rank], v=V[1:rank,]))
 }
 
-#' Compute the number of vectors to use for Hutchinson trace estimation
-#'
-#' Follows Skorski, M. (2021). Modern Analysis of Hutchinson’s Trace Estimator.
-#' 2021 55th Annual Conference on Information Sciences and Systems (CISS), 1–5.
-#' https://doi.org/10.1109/CISS50987.2021.9400306
-#'
-#' @param e A \code{numeric} denoting the relative error margin
-#' @param d A \code{numeric}. 1-d is the probability the the relative error is bounded
-#' by e.
-#'
-#' @return a scalar
-getNumVectorsHutchinson <- function(e, d){
-  2*(2+8*sqrt(2)/3*e)*log(2/d)/e^2
-}
-
-
-#' Trace estimation for sparse L inverse matrices
-#'
-#' Using Hutchinson's method
-#'
-#' @param L A pedigree's L inverse matrix
-#' @param numVectors, an \code{integer} specifying how many random vectors to use
-#'
-#' If you do not have a good reason to do otherwise, use the function \code{hutchpp} instead.
-#'
-#' The higher \code{numVectors}, the higher the accuracy and the longer the running time.
-#' Accuracy can be estimated with the function \code{getNumVectorsHutchinson}.
-#'
-#' @return a scalar
-randTraceHutchinson <- function(L, numVectors){
-  dim <- nrow(L)
-  testVectors <- rnorm(n = dim * numVectors)
-  testMatrix <- matrix(testVectors, nrow = dim, ncol = numVectors)
-  testMatrixColNorms <- apply(testMatrix, 2, function(col) sqrt(sum(col^2)))
-  normTestMatrix <- sweep(testMatrix, 2, testMatrixColNorms, FUN="/") * sqrt(dim)
-
-  Y <- spam::backsolve(t(L), normTestMatrix)
-  Y <- spam::forwardsolve(L, Y)
-  Ests <- colSums(Y * normTestMatrix)
-  return(mean(Ests))
-}
 
 #' Fast pedigree PCA using sparse matrices and randomised linear algebra
 #'
-#' @param pdg A representation of a pedigree, see Details.
+#' @param X A representation of a pedigree, see Details.
 #' @param method \code{string} only randSVD (the default) is implemented
 #' @param rank  \code{integer} how many principal components to return
 #' @param depth \code{integer} number of iterations for generating the range matrix
@@ -157,14 +116,14 @@ randTraceHutchinson <- function(L, numVectors){
 #'                 )
 #' pc2 <- rppca(ped)
 #'
-rppca <- function(pdg, ...) UseMethod("rppca")
+rppca <- function(X, ...) UseMethod("rppca")
 
 
 
 #' @rdname rppca
 #' @method rppca spam
 #' @export
-rppca.spam <- function(pdg,
+rppca.spam <- function(X,
                   method="randSVD",
                   rank=10,
                   depth=3,
@@ -174,9 +133,9 @@ rppca.spam <- function(pdg,
                   ...){
   #check L is the right kind of sparse matrix
   returnRotation=TRUE
-  nn <- dim(pdg)[1]
+  nn <- dim(X)[1]
   if(method=="randSVD"){
-    rsvd = randSVD(pdg, rank=rank, depth=depth, numVectors=numVectors, cent=center)
+    rsvd = randSVD(X, rank=rank, depth=depth, numVectors=numVectors, cent=center)
     scores = rsvd$u %*% diag(rsvd$d^2)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
 
@@ -210,7 +169,7 @@ rppca.spam <- function(pdg,
 #' @method rppca pedigree
 #' @export
 #' @importFrom pedigreeTools inbreeding getLInv
-rppca.pedigree <- function(pdg,
+rppca.pedigree <- function(X,
                           method="randSVD",
                           rank=10,
                           depth=3,
@@ -218,32 +177,33 @@ rppca.pedigree <- function(pdg,
                           totVar=NULL,
                           center=F,
                           ...){
-  #check L is the right kind of sparse matrix
+  #TODO: check L is the right kind of sparse matrix
   returnRotation=TRUE
 
   # get Linv
-  Lsp <- getLInv(pdg)
-  L <- sparse2spam(Lsp)
+  LIsp <- getLInv(X)
+  LI <- sparse2spam(LIsp)
   # get number of inds
-  nn <- dim(L)[1]
+  nn <- dim(LI)[1]
   # total var is sum of (inbreeding coefs + 1)
   if(center==F) {
     if(!missing(totVar)){
       warning("Using specified value of ", totVar, " for the total variance
       instead of the value computed from the pedigree, which was ",
-              sum(inbreeding(pdg) + 1))
-  } else {
-    totVar <- sum(inbreeding(pdg) + 1)
+              sum(inbreeding(X) + 1))
+  } else { # if totVar was no specified
+    totVar <- sum(inbreeding(X) + 1)
   }
   }
 
+  # if center == T
 
   # get inbreeding+1 ->total variance
 
   # return var components by default
 
   if(method=="randSVD"){
-    rsvd = randSVD(L, rank=rank, depth=depth, numVectors=numVectors, cent=center)
+    rsvd = randSVD(LI, rank=rank, depth=depth, numVectors=numVectors, cent=center)
     scores = rsvd$u %*% diag(rsvd$d^2)
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
     stdv <- rsvd$d
@@ -257,7 +217,7 @@ rppca.pedigree <- function(pdg,
                  center=center,
                  scale=FALSE
       )
-    } else {
+    } else { # if there is no value of totVar (with centring==T) then don't set var props
       pc <- list(x= scores,
                  sdev=stdv  / sqrt(max(1, nn-1)),
                  center=center,

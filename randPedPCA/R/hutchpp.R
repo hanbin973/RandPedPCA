@@ -1,10 +1,6 @@
 
 
-# returns the value of A * G (but taking L^-1 as input)
-oraculumLi <- function(Li, G){
-  Y <- spam::backsolve(t(Li), G)
-  return(spam::forwardsolve(Li, Y))
-}
+
 
 
 makeRandMat  = function(m, n) 2*matrix(sample(1:2, size = m*n, replace = TRUE, prob = c(0.5, 0.5)), nrow = m, ncol = n) - 3
