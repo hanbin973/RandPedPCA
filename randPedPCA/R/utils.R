@@ -1,5 +1,5 @@
 
-# Utility funcctions
+# Utility functions
 
 # The oracle function that returns the value of A * G (but taking L^-1 as input)
 oraculumLi <- function(Li, G){

@@ -90,10 +90,10 @@ test_that("rppca on pedigree, centred", {
                   dam   = pedMeta$mid,
                   label = pedMeta$id)
   expect_no_error(pc2 <- rppca(ped, center=T))
-  expect_warning(summary(pc2)) # total variance unknown
+  expect_no_condition(summary(pc2)) # total variance known
   expect_true(pc2$center)
   expect_false(pc2$scale)
-  expect_null(pc2$varProps)
+  expect_true(!is.null(pc2$varProps))
 })
 
 test_that("rppca on pedigree, centered with totVar", {
@@ -109,7 +109,7 @@ test_that("rppca on pedigree, centered with totVar", {
 })
 
 
-test_that("Comparing STD values between rppca on pedigree and L^-1 input", {
+test_that("Comparing STD values between rppca on pedigree and L^-1 input. May occasionally fail due to stochasticity.", {
   expect_no_condition(
     pc <- rppca(pedLInv)
   )
@@ -145,6 +145,43 @@ test_that("Comparing Hutch++ estimate to inbreeding-based vals (with centring)",
 })
 
 
+
+
+test_that("There is a warning if Hutch++ is used with centring but rppca without and vice versa", {
+  ped <- pedigree(sire  = pedMeta$fid,
+                  dam   = pedMeta$mid,
+                  label = pedMeta$id)
+  li <- sparse2spam(getLInv(ped))
+  tv <- hutchpp(li, center=T)
+  expect_warning(rppca(li, center=F, totVar = tv))
+  expect_no_condition(rppca(li, center=T, totVar = tv))
+  tvnc <- hutchpp(li, center=F)
+  expect_warning(rppca(li, center=T, totVar = tvnc))
+  expect_no_condition(rppca(li, center=F, totVar = tvnc))
+
+})
+
+
+
+test_that("There is a warning if Hutch++ is used with centring but rppca without and vice versa", {
+  ped <- pedigree(sire  = pedMeta$fid,
+                  dam   = pedMeta$mid,
+                  label = pedMeta$id)
+  li <- sparse2spam(getLInv(ped))
+  tv <- hutchpp(li, center=T)
+
+  # two warnings (1) one about supplying totVar even though it's computed
+  # (2) is about mismatch of center arguments
+  expect_warning(expect_warning(rppca(ped, center=F, totVar = tv)))
+
+  expect_no_condition(rppca(ped, center=T, totVar = tv))
+
+
+  tvnc <- hutchpp(li, center=F)
+  expect_warning(rppca(ped, center=T, totVar = tvnc))
+  expect_warning(rppca(ped, center=F, totVar = tvnc)) # a warning about supplying tv even though it's computed by default
+
+})
 
 
 

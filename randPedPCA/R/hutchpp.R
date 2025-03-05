@@ -61,6 +61,8 @@ hutchpp <- function(B,
   } else {
     trace_est <- sum(diag(t(Q) %*% oraculum(B, Q))) + sum(diag(t(G) %*% oraculum(B, G))) / Hutch_num_queries
   }
+
+  attr(trace_est, "center") <- center
   return(trace_est)
 }
 

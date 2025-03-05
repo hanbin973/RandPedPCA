@@ -59,7 +59,7 @@ plot(pc02, col = pedMeta$population)
 ```
 
 For simplicity, we decided to ship this $L^{-1}$ matrix as an example dataset.
-The PCA result is identical when using this object `pedLinv`:
+The PCA result is identical when using this object `pedLInv`:
 ```{r}
 pc03 <- rppca(pedLInv, center = T)
 plot(pc03, col = pedMeta$population)
@@ -71,7 +71,7 @@ in the examples above. If the data are not centred, PC1 tends to capture the
 deviation from mean = 0 of each data column. In the context of pedigree PCA,
 this usually means that PC1 accounts for a high proportion of the total variance
 and it usually aligns with time or generation number.
-```{r echo=F, fig.dim = c(6, 3)}
+```{r echo=F, message=F, fig.dim = c(6, 3)}
 set.seed(123345) # set random seed as Hutch++ uses random numbers
 ttv <- hutchpp(pedLInv,num_queries = 100, center = T) # estimate
 par(mfrow=c(1,2))
@@ -130,7 +130,7 @@ We recommend that users experiment with the value of `num_queries` to optimise
 accuracy. Using the the default value of 10 should work within reasonable time
 even for a large pedigree of 1M individuals.
 
-Hutch++ is particularly useful to compute the total variance of a **centred dataset**.
+Hutch++ can also be used to compute the total variance of a **centred dataset**.
 We demonstrate this here using a small simulated example, where we can perform
 naive centring for comparison.
 ```{r}
@@ -148,6 +148,9 @@ set.seed(123345) # set random seed as Hutch++ uses random numbers
 hutchpp(li,num_queries = 100, center = T) # estimate
 ```
 
+*If you want to use a* `hutchpp` *estimate when running* `rppca`, *make sure that the*
+`center` *values are identical. E.g., when running a PCA with centring, make
+sure that you have run* `hutchpp` *with centring as well!*
 
 ### Variance components - Examples
 The summary of a PCA generated from an $L^{-1}$ matrix by default only shows
@@ -184,14 +187,29 @@ pc07 <- rppca(ped, center=F, totVar=123)
 summary(pc07)
 ```
 
-**Centred PCA.** Supplying a value for the total variance is mostly relevant when running
-rppca with centring. We decribed above how Hutch++ can be used to obtain an estimate.
+####Centred PCA
+Variance proportions are automatically computed if the input is
+a pedigree.
 ```{r}
 # We used the value estimated in the Hutch++ example above (with centring)
-pc06 <- rppca(ped, center=T, totVar=2673.6) 
+pc06 <- rppca(ped, center=T) 
 summary(pc06)
 ```
 
+
+If the input is an $L^{-1}$ matrix, variance proportions are only computed if
+an estimate of the total variance is supplied.
+```{r}
+# No proportions shown by default
+pc08 <- rppca(pedLInv, center=T) 
+summary(pc08)
+```
+
+```{r}
+# Only when estimate is supplied
+pc09 <- rppca(pedLInv, center=T, totVar=2673.6) 
+summary(pc09)
+```
 
 # Plotting
 We generated a `plot` method for `rppca` objects. If the variance proportions are
@@ -228,8 +246,8 @@ like `pcDown <- dspc(pc)`. Calling `plot(pcDown)` repeatedly will generate the s
 
 # Using one's own data
 Users will mainly want to analyse their own empirical or simulated datasets. This
-should be straightforward if the data are in pedigree format. In this case, `rppca`
-can be called directly in such an object as demonstrated above. 
+should be straightforward if the data are in pedigree format, hich we recommend.
+In this case, `rppca` can be called directly in such an object as demonstrated above. 
 
 If the user has an $L^{-1}$ matrix, this needs to be converted into 
 a `spam` object, a specific sparse matrix format. We provide a wrapper

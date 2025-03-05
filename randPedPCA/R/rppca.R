@@ -2,6 +2,7 @@
 
 
 
+
 #' Generate range matrix for SVD
 #'
 #' @param L a pedigree's L inverse matrix in sparse 'spam' format
@@ -149,6 +150,14 @@ rppca.spam <- function(X,
     )
 
     if(!missing(totVar)) {
+
+      if(!is.null(attr(totVar, "center"))){
+        if(center != attr(totVar, "center")) {
+          warning("rppca is run with center=", center, ", but the value of totVar
+                  supplied has center=", attr(totVar, "center"))
+        }
+      }
+
       vp <- stdv^2/totVar
       names(vp) <- paste0("PC", 1:length(vp))
       pc$varProps <- vp
@@ -185,22 +194,23 @@ rppca.pedigree <- function(X,
   LI <- sparse2spam(LIsp)
   # get number of inds
   nn <- dim(LI)[1]
+
+  # totVar of non-centred A
+  tvnc <- sum(inbreeding(X) + 1)
+
   # total var is sum of (inbreeding coefs + 1)
   if(center==F) {
     if(!missing(totVar)){
       warning("Using specified value of ", totVar, " for the total variance
       instead of the value computed from the pedigree, which was ",
-              sum(inbreeding(X) + 1))
-  } else { # if totVar was no specified
-    totVar <- sum(inbreeding(X) + 1)
+              tvnc)
+      } else { # if totVar was not specified
+    totVar <- tvnc
   }
   }
 
-  # if center == T
 
-  # get inbreeding+1 ->total variance
 
-  # return var components by default
 
   if(method=="randSVD"){
     rsvd = randSVD(LI, rank=rank, depth=depth, numVectors=numVectors, cent=center)
@@ -208,22 +218,31 @@ rppca.pedigree <- function(X,
     dimnames(scores) <- list(NULL, paste0("PC", 1:rank))
     stdv <- rsvd$d
     names(stdv) <- paste0("PC", 1:length(stdv))
-    if(!is.null(totVar)){
-      vp <- stdv^2/totVar
-      names(vp) <- paste0("PC", 1:length(vp))
-      pc <- list(x= scores,
-                 sdev=stdv  / sqrt(max(1, nn-1)),
-                 varProps=vp,
-                 center=center,
-                 scale=FALSE
-      )
-    } else { # if there is no value of totVar (with centring==T) then don't set var props
-      pc <- list(x= scores,
-                 sdev=stdv  / sqrt(max(1, nn-1)),
-                 center=center,
-                 scale=FALSE
-      )
+
+    if(is.null(totVar)){ # if there is no value of totVar (can only happen with center==T) then estimate totVar
+      n <- dim(LI)[1]
+      onesVec <- rep(1, n)
+      totVar <- tvnc - as.vector(1/n * t(onesVec) %*% oraculumLi(LI, t(t(onesVec))))
+      attr(totVar, "center") <- TRUE
     }
+
+    #
+    if(!is.null(attr(totVar, "center"))){
+      if(center != attr(totVar, "center")) {
+        warning("rppca is run with center=", center, ", but the value of totVar
+                  supplied has center=", attr(totVar, "center"))
+      }
+}
+
+    vp <- stdv^2/totVar
+    names(vp) <- paste0("PC", 1:length(vp))
+
+    pc <- list(x= scores,
+               sdev=stdv  / sqrt(max(1, nn-1)),
+               varProps=vp,
+               center=center,
+               scale=FALSE
+    )
 
 
     # return rotation only if requested

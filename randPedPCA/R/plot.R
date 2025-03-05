@@ -15,7 +15,7 @@ plot.rppca <- function(x, dims=c(1,2), to=10000, col=NULL, xlab=NULL, ylab=NULL,
       # warn if col has different length to number of individuals
       if(length(col) != nrow(x$x)) warning(paste0("The length of col was ", length(col), " but there were ", nrow(x$x), " individuals."))
 
-      message("Downsampling colours.")
+      message("Subsetting colours using the individual index.")
       cols <- col[x$ds] # downsample colours if any
     } else {
       cols <- col
