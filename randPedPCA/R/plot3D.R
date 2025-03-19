@@ -19,7 +19,7 @@
 #' not down-sample the principal components and it ignores the \code{ds} slot of an
 #' \code{rppca} object if present.
 #'
-#'
+#' @return No return value, called for its side effects.
 #' @export
 #' @examples
 #' pc <- rppca(pedLInv)
