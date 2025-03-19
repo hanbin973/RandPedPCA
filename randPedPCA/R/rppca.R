@@ -18,7 +18,7 @@
 #' @importFrom spam backsolve
 #' @importFrom spam forwardsolve
 #' @importFrom stats rnorm
-randRangeFinder <- function(L, rank, depth, numVectors, cent=F){
+randRangeFinder <- function(L, rank, depth, numVectors, cent=FALSE){
   dim <- nrow(L)
   testVectors <- rnorm(n = dim * numVectors)
   testMatrix <- matrix(testVectors, nrow = dim, ncol = numVectors)
@@ -52,7 +52,7 @@ randRangeFinder <- function(L, rank, depth, numVectors, cent=F){
 #' @export
 #'
 #' @importFrom spam backsolve
-randSVD <- function(L, rank, depth, numVectors, cent=F){
+randSVD <- function(L, rank, depth, numVectors, cent=FALSE){
   # L: lower cholesky factor of animal matrix
   # rank: number of PCs
   # depth: power iteration, higher -> more accurate approximation, ~5 is usually sufficient
@@ -130,7 +130,7 @@ rppca.spam <- function(X,
                   depth=3,
                   numVectors=15,
                   totVar=NULL,
-                  center=F,
+                  center=FALSE,
                   ...){
   #check L is the right kind of sparse matrix
   returnRotation=TRUE
@@ -184,9 +184,9 @@ rppca.pedigree <- function(X,
                           depth=3,
                           numVectors=15,
                           totVar=NULL,
-                          center=F,
+                          center=FALSE,
                           ...){
-  #TODO: check L is the right kind of sparse matrix
+  #TODO: add check that L is the right kind of sparse matrix
   returnRotation=TRUE
 
   # get Linv
@@ -199,7 +199,7 @@ rppca.pedigree <- function(X,
   tvnc <- sum(inbreeding(X) + 1)
 
   # total var is sum of (inbreeding coefs + 1)
-  if(center==F) {
+  if(center==FALSE) {
     if(!missing(totVar)){
       warning("Using specified value of ", totVar, " for the total variance
       instead of the value computed from the pedigree, which was ",
@@ -219,7 +219,7 @@ rppca.pedigree <- function(X,
     stdv <- rsvd$d
     names(stdv) <- paste0("PC", 1:length(stdv))
 
-    if(is.null(totVar)){ # if there is no value of totVar (can only happen with center==T) then estimate totVar
+    if(is.null(totVar)){ # if there is no value of totVar (can only happen with center==TRUE) then estimate totVar
       n <- dim(LI)[1]
       onesVec <- rep(1, n)
       totVar <- tvnc - as.vector(1/n * t(onesVec) %*% oraculumLi(LI, t(t(onesVec))))

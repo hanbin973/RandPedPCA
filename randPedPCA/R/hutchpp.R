@@ -41,7 +41,7 @@ makeRandMat  = function(m, n) 2*matrix(sample(1:2, size = m*n, replace = TRUE, p
 hutchpp <- function(B,
                     num_queries=10,
                     sketch_frac = 2/3,
-                    center=F,
+                    center=FALSE,
                     oraculum=oraculumLi){
   oraculum <- match.fun(oraculum)
   dimension <- dim(B)[1]

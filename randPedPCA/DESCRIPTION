@@ -7,9 +7,9 @@ Authors@R: c(
     person("Hannes", "Becher", email = "h.becher@ed.ac.uk", role = "cre"),
     person("Ros", "Craddock", email="", role= "aut"),
     person("Gregor", "Gorjanc", email="", role= "aut"))
-Description: randPedPCA is for computing PCAs of large pedigrees such as found
-    in breeding populations. randPedPCA exploits sparse matrices and randomised
-    linear algebra to deliver a gazillion-times speedup compared to naive SVD 
+Description: Compute PCAs of large pedigrees such as found
+    in breeding populations! This package, 'randPedPCA', exploits sparse matrices and randomised
+    linear algebra to deliver a gazillion-times speed-up compared to naive SVD 
     (and eigen decomposition).
 License: MIT + file LICENSE
 Encoding: UTF-8
