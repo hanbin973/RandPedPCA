@@ -7,8 +7,8 @@
 plot3DWithProj(
   pc,
   dims = c(1, 2, 3),
-  plotProj = T,
-  grid = T,
+  plotProj = TRUE,
+  grid = TRUE,
   col = 1,
   ff = 0.5,
   theta = -45,

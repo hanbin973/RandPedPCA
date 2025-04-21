@@ -8,7 +8,7 @@ hutchpp(
   B,
   num_queries = 10,
   sketch_frac = 2/3,
-  center = F,
+  center = FALSE,
   oraculum = oraculumLi
 )
 }

@@ -4,7 +4,7 @@
 \alias{randSVD}
 \title{Singular value decomposition in sparse triangular matrix}
 \usage{
-randSVD(L, rank, depth, numVectors, cent = F)
+randSVD(L, rank, depth, numVectors, cent = FALSE)
 }
 \arguments{
 \item{L}{a pedigree's L inverse matrix in sparse 'spam' format}

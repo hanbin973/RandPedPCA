@@ -4,7 +4,7 @@
 \alias{randRangeFinder}
 \title{Generate range matrix for SVD}
 \usage{
-randRangeFinder(L, rank, depth, numVectors, cent = F)
+randRangeFinder(L, rank, depth, numVectors, cent = FALSE)
 }
 \arguments{
 \item{L}{a pedigree's L inverse matrix in sparse 'spam' format}

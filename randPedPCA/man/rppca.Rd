@@ -15,7 +15,7 @@ rppca(X, ...)
   depth = 3,
   numVectors = 15,
   totVar = NULL,
-  center = F,
+  center = FALSE,
   ...
 )
 
@@ -26,7 +26,7 @@ rppca(X, ...)
   depth = 3,
   numVectors = 15,
   totVar = NULL,
-  center = F,
+  center = FALSE,
   ...
 )
 }

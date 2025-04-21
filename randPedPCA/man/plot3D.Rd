@@ -19,6 +19,9 @@ plot3D(x, dims = c(1, 2, 3), xlab = NULL, ylab = NULL, zlab = NULL, ...)
 
 \item{...}{additional arguments passed to rgl::plot3d}
 }
+\value{
+No return value, called for its side effects.
+}
 \description{
 A simple wrapper around rgl's pot3d function.
 }
