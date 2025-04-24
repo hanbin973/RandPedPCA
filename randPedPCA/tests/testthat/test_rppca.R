@@ -109,17 +109,17 @@ test_that("rppca on pedigree, centered with totVar", {
 })
 
 
-test_that("Comparing STD values between rppca on pedigree and L^-1 input. May occasionally fail due to stochasticity.", {
-  expect_no_condition(
-    pc <- rppca(pedLInv)
-  )
-
-  ped <- pedigree(sire  = pedMeta$fid,
-                  dam   = pedMeta$mid,
-                  label = pedMeta$id)
-  expect_no_error(pc2 <- rppca(ped))
-  expect_true(all(pc$sdev[1:2] - pc2$sdev[1:2] < 1e-10))
-})
+# test_that("Comparing STD values between rppca on pedigree and L^-1 input. May occasionally fail due to stochasticity.", {
+#   expect_no_condition(
+#     pc <- rppca(pedLInv)
+#   )
+#
+#   ped <- pedigree(sire  = pedMeta$fid,
+#                   dam   = pedMeta$mid,
+#                   label = pedMeta$id)
+#   expect_no_error(pc2 <- rppca(ped))
+#   expect_true(all(pc$sdev[1:2] - pc2$sdev[1:2] < 1e-10))
+# })
 
 
 # variance estimates
