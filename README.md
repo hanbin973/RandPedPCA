@@ -17,6 +17,9 @@ via the randomized singular value decomposition (rSVD) described in [Halko et
 al. (2011)](http://dx.doi.org/10.1137/090771806). The resulting principal
 components can reveal the underlying population structure of a pedigree.
 
+# Preprint
+Check out our preprint on bioRxiv [here](https://doi.org/10.1101/2025.03.17.643624).
+
 # R package
 
 ## Setup
